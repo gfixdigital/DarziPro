@@ -70,6 +70,9 @@ class HiveService {
   static bool get dailySummary => settings.get('daily_summary', defaultValue: false) as bool;
   static set dailySummary(bool value) => settings.put('daily_summary', value);
 
+  static bool get hasSeenAndroidPrompt => settings.get('has_seen_android_prompt', defaultValue: false) as bool;
+  static set hasSeenAndroidPrompt(bool value) => settings.put('has_seen_android_prompt', value);
+
   // ─── Customers ───────────────────────────────────────────
   static Box<Customer> get customersBoxInstance =>
       Hive.box<Customer>(customersBox);

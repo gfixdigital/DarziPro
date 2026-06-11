@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/strings.dart';
@@ -41,6 +43,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     _refreshData();
+    _checkAndroidPrompt();
   }
 
   @override
@@ -57,6 +60,90 @@ class _DashboardScreenState extends State<DashboardScreen> {
         context.read<CustomerProvider>().loadCustomers();
       }
     });
+  }
+
+  void _checkAndroidPrompt() {
+    if (kIsWeb && !HiveService.hasSeenAndroidPrompt) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _showAndroidDownloadDialog();
+        }
+      });
+    }
+  }
+
+  void _showAndroidDownloadDialog() {
+    final isUrdu = HiveService.language == 'ur';
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          icon: const Icon(
+            Icons.android,
+            color: Color(0xFF3DDC84),
+            size: 48,
+          ),
+          title: Text(
+            isUrdu ? 'اینڈرائیڈ ایپ دستیاب ہے!' : 'Android App Available!',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.labelLg.copyWith(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                isUrdu
+                    ? 'بہترین تجربہ، تیز رفتار لوڈنگ اور آف لائن کام کرنے کے لیے اینڈرائیڈ ایپ ڈاؤن لوڈ کریں۔'
+                    : 'Download the Android app for the best experience, offline usage, and push notifications.',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.bodyMd.copyWith(color: kTextSecondary),
+              ),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.spaceEvenly,
+          actions: [
+            TextButton(
+              onPressed: () {
+                HiveService.hasSeenAndroidPrompt = true;
+                Navigator.pop(ctx);
+              },
+              child: Text(
+                isUrdu ? 'بعد میں' : 'Later',
+                style: const TextStyle(color: kTextSecondary),
+              ),
+            ),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3DDC84),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                elevation: 0,
+              ),
+              onPressed: () async {
+                HiveService.hasSeenAndroidPrompt = true;
+                Navigator.pop(ctx);
+                final url = Uri.parse('https://github.com/gfixdigital/DarziPro/raw/main/build/app/outputs/flutter-apk/app-release.apk');
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                }
+              },
+              icon: const Icon(Icons.download, size: 18),
+              label: Text(
+                isUrdu ? 'ڈاؤن لوڈ کریں' : 'Download',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   List<AppNotification> _getNotifications(BuildContext context) {

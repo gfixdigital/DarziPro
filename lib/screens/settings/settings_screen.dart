@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/strings.dart';
@@ -225,6 +227,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ]),
           const SizedBox(height: 16),
 
+          // Download Android App (Web only)
+          if (kIsWeb) ...[
+            _buildDownloadAndroidCard(),
+            const SizedBox(height: 16),
+          ],
+
           // Reports & Logs
           _buildCard(AppStrings.reportsLogs, [
             AppButton(
@@ -366,4 +374,87 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+
+  Widget _buildDownloadAndroidCard() {
+    final isUrdu = HiveService.language == 'ur';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF3DDC84), Color(0xFF007A33)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF3DDC84).withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.android,
+              color: Color(0xFF3DDC84),
+              size: 32,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isUrdu ? 'اینڈرائیڈ ایپ ڈاؤن لوڈ کریں' : 'Download Android App',
+                  style: AppTextStyles.labelLg.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isUrdu
+                      ? 'موبائل پر بہترین کارکردگی اور آف لائن کام کرنے کے لیے!'
+                      : 'Get the mobile app for offline use and real-time alerts!',
+                  style: AppTextStyles.bodySm.copyWith(
+                    color: Colors.white.withOpacity(0.9),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFF007A33),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              elevation: 0,
+            ),
+            onPressed: () async {
+              final url = Uri.parse('https://github.com/gfixdigital/DarziPro/raw/main/build/app/outputs/flutter-apk/app-release.apk');
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              }
+            },
+            child: const Icon(Icons.download),
+          ),
+        ],
+      ),
+    );
+  }
 }
+
