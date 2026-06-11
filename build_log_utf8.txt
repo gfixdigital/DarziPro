@@ -1,0 +1,13 @@
+﻿C:\src\flutter\bin\flutter.bat : Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you 
+trust this source!
+At line:1 char:1
++ C:\src\flutter\bin\flutter.bat build apk --release > build_log.txt 2> ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Flutter assets ...st this source!:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Running Gradle task 'assembleRelease'...                        
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 11048 bytes (99.3% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+Running Gradle task 'assembleRelease'...                          140.0s
+ΓêÜ Built build\app\outputs\flutter-apk\app-release.apk (52.9MB)
