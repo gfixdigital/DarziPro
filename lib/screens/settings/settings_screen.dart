@@ -445,7 +445,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               elevation: 0,
             ),
             onPressed: () async {
-              final url = Uri.parse('https://github.com/gfixdigital/DarziPro/raw/main/build/app/outputs/flutter-apk/app-release.apk');
+              final url = Uri.parse('https://darzi-pro-pink.vercel.app/app-release.apk');
               if (await canLaunchUrl(url)) {
                 await launchUrl(url, mode: LaunchMode.externalApplication);
               }
