@@ -8,6 +8,7 @@ import '../../core/constants/strings.dart';
 import '../../core/services/hive_service.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/utils/url_helper.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/sync_provider.dart';
 import '../../providers/language_provider.dart';
@@ -445,7 +446,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               elevation: 0,
             ),
             onPressed: () async {
-              final url = Uri.parse('https://darzi-pro-pink.vercel.app/app-release.apk');
+              final url = Uri.parse('${getAppUrl()}/app-release.apk');
               if (await canLaunchUrl(url)) {
                 await launchUrl(url, mode: LaunchMode.externalApplication);
               }
