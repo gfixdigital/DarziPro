@@ -66,25 +66,32 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 40),
 
                   // Logo
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: kPrimary,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: kPrimary.withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
+                  Image.network(
+                    'https://ik.imagekit.io/vveiuli91/Pictures/GFix%20digital%20Logo%20wth%20rectangle%20shape.png',
+                    height: 90,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: kPrimary,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: kPrimary.withOpacity(0.3),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.content_cut,
-                      color: Colors.white,
-                      size: 40,
-                    ),
+                        child: const Icon(
+                          Icons.content_cut,
+                          color: Colors.white,
+                          size: 40,
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 24),
 
