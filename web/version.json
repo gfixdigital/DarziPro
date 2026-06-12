@@ -1,1 +1,1 @@
-{ "version": "1.0.0", "build": 1, "releaseNotes": "Bug fixes and performance improvements." }
+{ "version": "1.0.1", "build": 2, "releaseNotes": "Auto-sync when reconnecting to internet. OTA update notifications. Duplicate order ID fix." }
