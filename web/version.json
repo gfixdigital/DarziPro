@@ -1,1 +1,1 @@
-{ "version": "1.0.1", "build": 2, "releaseNotes": "Auto-sync when reconnecting to internet. OTA update notifications. Duplicate order ID fix." }
+{ "version": "1.0.2", "build": 3, "releaseNotes": "New floating nav bar design. In-app OTA download with real-time progress bar. Order save confirmation dialog." }
