@@ -1,1 +1,1 @@
-{ "version": "1.0.3", "build": 4, "releaseNotes": "In-app OTA download fixed with proper state management and loading/progress bars." }
+{ "version": "1.0.4", "build": 5, "releaseNotes": "Auto-sync on resume, database timezones in UTC, and external cache APK storage path." }

@@ -174,13 +174,14 @@ class _HomeScreen extends StatefulWidget {
   State<_HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<_HomeScreen> {
+class _HomeScreenState extends State<_HomeScreen> with WidgetsBindingObserver {
   late int _currentIndex;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    WidgetsBinding.instance.addObserver(this);
 
     // Wire up post-sync data refresh so UI updates automatically when phone
     // reconnects to internet and pulls cloud changes (no logout needed)
@@ -191,7 +192,28 @@ class _HomeScreenState extends State<_HomeScreen> {
         context.read<OrderProvider>().loadOrders();
         context.read<CustomerProvider>().loadCustomers();
       };
+
+      // Trigger automatic sync on startup if online
+      if (syncProvider.isOnline) {
+        syncProvider.syncNow();
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      final syncProvider = context.read<SyncProvider>();
+      if (syncProvider.isOnline) {
+        syncProvider.syncNow();
+      }
+    }
   }
 
   final _screens = const [

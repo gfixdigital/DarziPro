@@ -207,7 +207,16 @@ class _DownloadProgressDialogState extends State<_DownloadProgressDialog> {
         setState(() => _isIndeterminate = true);
       }
 
-      final dir = await getTemporaryDirectory();
+      Directory? dir;
+      if (!kIsWeb && Platform.isAndroid) {
+        try {
+          final dirs = await getExternalCacheDirectories();
+          if (dirs != null && dirs.isNotEmpty) {
+            dir = dirs.first;
+          }
+        } catch (_) {}
+      }
+      dir ??= await getTemporaryDirectory();
       final file = File('${dir.path}/darzi_pro_update.apk');
       final sink = file.openWrite();
 

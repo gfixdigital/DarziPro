@@ -55,7 +55,7 @@ class SupabaseService {
     var query = client.from(table).select().eq('shop_id', shopId);
 
     if (since != null) {
-      query = query.gte('updated_at', since.toIso8601String());
+      query = query.gte('updated_at', since.toUtc().toIso8601String());
     }
 
     final response = await query;

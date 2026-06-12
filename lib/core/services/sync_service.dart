@@ -31,7 +31,7 @@ class SyncService {
       await _syncMeasurements();
       await _syncStylePreferences();
 
-      HiveService.lastSyncTime = DateTime.now();
+      HiveService.lastSyncTime = DateTime.now().toUtc();
       _isSyncing = false;
       return true;
     } catch (e) {
@@ -50,7 +50,7 @@ class SyncService {
       await _pullOrders(shopId);
       await _pullMeasurements(shopId);
       await _pullStylePreferences(shopId);
-      HiveService.lastSyncTime = DateTime.now();
+      HiveService.lastSyncTime = DateTime.now().toUtc();
     } catch (e) {
       debugPrint('Pull error: $e');
     }
@@ -64,7 +64,7 @@ class SyncService {
       await _pullOrders(shopId, since: since);
       await _pullMeasurements(shopId, since: since);
       await _pullStylePreferences(shopId, since: since);
-      HiveService.lastSyncTime = DateTime.now();
+      HiveService.lastSyncTime = DateTime.now().toUtc();
     } catch (e) {
       debugPrint('Pull updates error: $e');
     }
