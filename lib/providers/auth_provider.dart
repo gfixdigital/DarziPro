@@ -78,7 +78,15 @@ class AuthProvider extends ChangeNotifier {
                 .trim();
           }
 
-          // Pull all data on first login
+          // CRITICAL FIX: Clear stale local data before pulling from cloud.
+          // This ensures that when logging in on phone or web, you always see
+          // the correct authoritative cloud data instead of stale/duplicate local data.
+          await HiveService.ordersBoxInstance.clear();
+          await HiveService.customersBoxInstance.clear();
+          await HiveService.measurementsBoxInstance.clear();
+          await HiveService.stylePrefsBoxInstance.clear();
+
+          // Pull fresh data from cloud
           await SyncService.pullAll(shopId);
         }
 

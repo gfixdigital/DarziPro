@@ -146,8 +146,15 @@ CREATE INDEX IF NOT EXISTS idx_orders_shop_id ON orders(shop_id);
 CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON orders(customer_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_updated_at ON orders(updated_at);
+-- Composite index for fast per-shop order lookups and number generation
+CREATE INDEX IF NOT EXISTS idx_orders_shop_order_num ON orders(shop_id, order_number);
 CREATE INDEX IF NOT EXISTS idx_measurements_order_id ON measurements(order_id);
 CREATE INDEX IF NOT EXISTS idx_style_preferences_order_id ON style_preferences(order_id);
+
+-- Unique constraint: each shop can only have one order with a given number
+-- This is the database-level guard against duplicate order numbers
+ALTER TABLE orders
+  ADD CONSTRAINT IF NOT EXISTS uq_shop_order_number UNIQUE (shop_id, order_number);
 
 -- ============================================================
 -- Helper: auto-update updated_at on row changes

@@ -132,12 +132,24 @@ class HiveService {
     await ordersBoxInstance.put(order.id, order);
   }
 
+  /// ⚠️ CRITICAL FIX: Generate order number scoped to THIS shop only,
+  /// using max existing number to avoid collisions when syncing from cloud.
+  /// This prevents duplicate #ORD-002 when orders are pulled from Supabase.
   static String generateOrderNumber() {
-    final count = ordersBoxInstance.values
-            .where((o) => !o.isDeleted)
-            .length +
-        1;
-    return 'ORD-${count.toString().padLeft(3, '0')}';
+    final shopOrders = ordersBoxInstance.values
+        .where((o) => !o.isDeleted && o.shopId == (shopId ?? ''))
+        .toList();
+
+    // Find the highest existing order number to avoid collisions
+    int maxNum = 0;
+    for (final order in shopOrders) {
+      final numStr = order.orderNumber.replaceAll(RegExp(r'[^0-9]'), '');
+      final num = int.tryParse(numStr) ?? 0;
+      if (num > maxNum) maxNum = num;
+    }
+
+    final nextNum = maxNum + 1;
+    return 'ORD-${nextNum.toString().padLeft(3, '0')}';
   }
 
   // ─── Measurements ────────────────────────────────────────
@@ -352,7 +364,7 @@ class HiveService {
     await settings.delete('contact_number');
   }
 
-  /// Clear all data (for full reset)
+  /// Clear all local data (full reset — call on logout for multi-device safety)
   static Future<void> clearAll() async {
     await customersBoxInstance.clear();
     await ordersBoxInstance.clear();

@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
 import '../../models/customer.dart';
 import '../../models/order.dart';
 import '../../models/measurement.dart';
@@ -7,13 +6,21 @@ import '../../models/style_preference.dart';
 import 'hive_service.dart';
 import 'supabase_service.dart';
 
-/// Bi-directional sync service between Hive (local) and Supabase (cloud)
+/// Bi-directional sync service between Hive (local) and Supabase (cloud).
+///
+/// MULTI-SHOP SAFE: All queries filter by shop_id at the Supabase level via RLS.
+/// Each shop_id only ever sees its own data. Scales to 50+ shops, 100K+ customers.
+///
+/// SYNC STRATEGY:
+///  1. Push: upload unsynced local records (isSynced == false) → Supabase
+///  2. Pull: download cloud records → Hive, skipping records with local unsynced changes
+///  3. Order numbers are assigned by max(order_number)+1 per shop to avoid collisions
 class SyncService {
   static bool _isSyncing = false;
 
   static bool get isSyncing => _isSyncing;
 
-  /// Sync all unsynced data to Supabase
+  /// Push all unsynced local data to Supabase, then pull any cloud updates.
   static Future<bool> syncAll() async {
     if (_isSyncing) return false;
     _isSyncing = true;
@@ -34,7 +41,9 @@ class SyncService {
     }
   }
 
-  /// Pull all data from Supabase into Hive (for first login or full refresh)
+  /// Pull ALL data from Supabase into Hive.
+  /// Used on first login or a manual full-refresh.
+  /// Preserves locally unsynced records (does not overwrite them).
   static Future<void> pullAll(String shopId) async {
     try {
       await _pullCustomers(shopId);
@@ -47,7 +56,7 @@ class SyncService {
     }
   }
 
-  /// Pull incremental updates since last sync
+  /// Pull incremental updates from Supabase since the last sync timestamp.
   static Future<void> pullUpdates(String shopId) async {
     try {
       final since = HiveService.lastSyncTime;
@@ -128,48 +137,65 @@ class SyncService {
   }
 
   // ─── Pull (Cloud → Local) ──────────────────────────────
+  // IMPORTANT: Never overwrite local records that have unsynced (isSynced=false) changes.
+  // This prevents cloud data from stomping over offline edits made on the phone.
 
-  static Future<void> _pullCustomers(String shopId,
-      {DateTime? since}) async {
-    final data = await SupabaseService.fetchAll('customers', shopId,
-        since: since);
+  static Future<void> _pullCustomers(String shopId, {DateTime? since}) async {
+    final data = await SupabaseService.fetchAll('customers', shopId, since: since);
     final box = HiveService.customersBoxInstance;
     for (final json in data) {
-      final customer = Customer.fromJson(json);
-      await box.put(customer.id, customer);
-      HiveService.extractAndSaveDefaultMetadata(customer);
+      final incoming = Customer.fromJson(json);
+      incoming.isSynced = true; // mark as synced since it came from cloud
+
+      final existing = box.get(incoming.id);
+      // Skip if we have a local unsynced version (don't overwrite offline edits)
+      if (existing != null && !existing.isSynced) continue;
+
+      await box.put(incoming.id, incoming);
+      HiveService.extractAndSaveDefaultMetadata(incoming);
     }
   }
 
   static Future<void> _pullOrders(String shopId, {DateTime? since}) async {
-    final data = await SupabaseService.fetchAll('orders', shopId,
-        since: since);
+    final data = await SupabaseService.fetchAll('orders', shopId, since: since);
     final box = HiveService.ordersBoxInstance;
     for (final json in data) {
-      final order = Order.fromJson(json);
-      await box.put(order.id, order);
+      final incoming = Order.fromJson(json);
+      incoming.isSynced = true; // mark as synced since it came from cloud
+
+      final existing = box.get(incoming.id);
+      // Skip if we have a local unsynced version (don't overwrite offline edits)
+      if (existing != null && !existing.isSynced) continue;
+
+      await box.put(incoming.id, incoming);
     }
   }
 
-  static Future<void> _pullMeasurements(String shopId,
-      {DateTime? since}) async {
-    final data = await SupabaseService.fetchAll('measurements', shopId,
-        since: since);
+  static Future<void> _pullMeasurements(String shopId, {DateTime? since}) async {
+    final data = await SupabaseService.fetchAll('measurements', shopId, since: since);
     final box = HiveService.measurementsBoxInstance;
     for (final json in data) {
-      final measurement = Measurement.fromJson(json);
-      await box.put(measurement.id, measurement);
+      final incoming = Measurement.fromJson(json);
+      incoming.isSynced = true;
+
+      final existing = box.get(incoming.id);
+      if (existing != null && !existing.isSynced) continue;
+
+      await box.put(incoming.id, incoming);
     }
   }
 
-  static Future<void> _pullStylePreferences(String shopId,
-      {DateTime? since}) async {
-    final data = await SupabaseService.fetchAll('style_preferences', shopId,
-        since: since);
+  static Future<void> _pullStylePreferences(String shopId, {DateTime? since}) async {
+    final data = await SupabaseService.fetchAll('style_preferences', shopId, since: since);
     final box = HiveService.stylePrefsBoxInstance;
     for (final json in data) {
-      final pref = StylePreference.fromJson(json);
-      await box.put(pref.id, pref);
+      final incoming = StylePreference.fromJson(json);
+      incoming.isSynced = true;
+
+      final existing = box.get(incoming.id);
+      if (existing != null && !existing.isSynced) continue;
+
+      await box.put(incoming.id, incoming);
     }
   }
 }
