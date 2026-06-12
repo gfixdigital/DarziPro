@@ -79,20 +79,46 @@ class OrderProvider extends ChangeNotifier {
 
     await HiveService.saveOrder(order);
 
-    // Only save measurement if it has actual data
+    // CRITICAL: Create FRESH instances — never mutate an existing Hive object
+    // with a new key (causes HiveError: same instance stored with two different keys)
     if (measurement != null) {
-      measurement.orderId = orderId;
-      measurement.shopId = shopId;
-      measurement.id = uuid.v4();
-      await HiveService.saveMeasurement(measurement);
+      final freshMeasurement = Measurement(
+        id: uuid.v4(),
+        orderId: orderId,
+        shopId: shopId,
+        kameezLength: measurement.kameezLength,
+        sleeve: measurement.sleeve,
+        shoulder: measurement.shoulder,
+        neck: measurement.neck,
+        hem: measurement.hem,
+        chest: measurement.chest,
+        waist: measurement.waist,
+        shalwarLength: measurement.shalwarLength,
+        legOpening: measurement.legOpening,
+        cuff: measurement.cuff,
+        fitNotes: measurement.fitNotes,
+        isSynced: false,
+      );
+      await HiveService.saveMeasurement(freshMeasurement);
     }
 
-    // Only save style preference if it has actual data
     if (stylePreference != null) {
-      stylePreference.orderId = orderId;
-      stylePreference.shopId = shopId;
-      stylePreference.id = uuid.v4();
-      await HiveService.saveStylePreference(stylePreference);
+      final freshStyle = StylePreference(
+        id: uuid.v4(),
+        orderId: orderId,
+        shopId: shopId,
+        collar: stylePreference.collar,
+        pockets: List<String>.from(stylePreference.pockets),
+        daman: stylePreference.daman,
+        cuffs: stylePreference.cuffs,
+        silkThread: stylePreference.silkThread,
+        stitching: stylePreference.stitching,
+        buttons: stylePreference.buttons,
+        suitStyle: List<String>.from(stylePreference.suitStyle),
+        shalwarStyle: stylePreference.shalwarStyle,
+        isSynced: false,
+      );
+      await HiveService.saveStylePreference(freshStyle);
     }
 
     loadOrders();
