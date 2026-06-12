@@ -10,14 +10,13 @@ import '../../core/constants/colors.dart';
 import '../../core/services/hive_service.dart';
 
 /// Checks if a newer version of the Android app is available.
-/// Shows a download dialog with real-time progress bar.
 class UpdateService {
   static const String _versionUrl =
       'https://app.gfixdigital.com/version.json';
-  static const String _apkUrl =
+  static const String apkUrl =
       'https://app.gfixdigital.com/app-release.apk';
 
-  /// Checks for update. Returns null if up-to-date or on web.
+  /// Returns update info if newer version exists, null if up-to-date or on web.
   static Future<UpdateInfo?> checkForUpdate() async {
     if (kIsWeb) return null;
 
@@ -36,7 +35,8 @@ class UpdateService {
       final info = await PackageInfo.fromPlatform();
       final localBuild = int.tryParse(info.buildNumber) ?? 0;
 
-      debugPrint('UpdateService: remote=$remoteBuild local=$localBuild');
+      debugPrint(
+          'UpdateService: remote=v$remoteVersion($remoteBuild) local=v${info.version}($localBuild)');
 
       // Only show if server has a strictly higher build number
       if (remoteBuild > localBuild) {
@@ -53,157 +53,6 @@ class UpdateService {
     }
 
     return null;
-  }
-
-  /// Shows an in-app download progress dialog and installs the APK.
-  static Future<void> downloadAndInstall(BuildContext context) async {
-    if (kIsWeb) return;
-    final isUrdu = HiveService.language == 'ur';
-
-    double progress = 0;
-    bool isComplete = false;
-    String? error;
-
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setState) {
-            // Start download on first build
-            if (progress == 0 && !isComplete && error == null) {
-              _downloadApk(
-                onProgress: (p) {
-                  if (ctx.mounted) setState(() => progress = p);
-                },
-                onComplete: (path) async {
-                  if (ctx.mounted) setState(() => isComplete = true);
-                  await Future.delayed(const Duration(milliseconds: 500));
-                  if (ctx.mounted) Navigator.pop(ctx);
-                  await OpenFile.open(path);
-                },
-                onError: (e) {
-                  if (ctx.mounted) setState(() => error = e);
-                },
-              );
-            }
-
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header icon
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: kPrimary.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      isComplete
-                          ? Icons.check_circle
-                          : Icons.system_update,
-                      color: isComplete ? Colors.green : kPrimary,
-                      size: 36,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Title
-                  Text(
-                    error != null
-                        ? (isUrdu ? 'خرابی ہوئی' : 'Download Failed')
-                        : isComplete
-                            ? (isUrdu ? 'ڈاؤن لوڈ مکمل!' : 'Download Complete!')
-                            : (isUrdu ? 'اپڈیٹ ڈاؤن لوڈ ہو رہی ہے...' : 'Downloading Update...'),
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-
-                  if (error != null) ...[
-                    Text(
-                      error!,
-                      style: const TextStyle(color: Colors.red, fontSize: 12),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: Text(isUrdu ? 'بند کریں' : 'Close'),
-                    ),
-                  ] else ...[
-                    // Progress bar
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: LinearProgressIndicator(
-                        value: isComplete ? 1.0 : progress,
-                        minHeight: 10,
-                        backgroundColor: kPrimary.withOpacity(0.12),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          isComplete ? Colors.green : kPrimary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // Percentage text
-                    Text(
-                      isComplete
-                          ? (isUrdu ? 'انسٹال ہو رہا ہے...' : 'Installing...')
-                          : '${(progress * 100).toInt()}%',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: kTextSecondary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  static Future<void> _downloadApk({
-    required void Function(double) onProgress,
-    required void Function(String) onComplete,
-    required void Function(String) onError,
-  }) async {
-    try {
-      final client = http.Client();
-      final request = http.Request('GET', Uri.parse(_apkUrl));
-      final response = await client.send(request);
-
-      final totalBytes = response.contentLength ?? 0;
-      int receivedBytes = 0;
-
-      final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/darzi_pro_update.apk');
-      final sink = file.openWrite();
-
-      await for (final chunk in response.stream) {
-        sink.add(chunk);
-        receivedBytes += chunk.length;
-        if (totalBytes > 0) {
-          onProgress(receivedBytes / totalBytes);
-        }
-      }
-
-      await sink.flush();
-      await sink.close();
-      client.close();
-
-      onComplete(file.path);
-    } catch (e) {
-      onError('Download failed: ${e.toString().substring(0, 60)}');
-    }
   }
 }
 
@@ -223,7 +72,7 @@ class UpdateInfo {
   });
 }
 
-// ─── Reusable update dialog widget ───────────────────────────────────────────
+// ─── Update notification dialog ───────────────────────────────────────────────
 class UpdateDialog extends StatelessWidget {
   final UpdateInfo update;
   const UpdateDialog({super.key, required this.update});
@@ -259,7 +108,7 @@ class UpdateDialog extends StatelessWidget {
         children: [
           Text(
             isUrdu
-                ? 'ورژن ${update.remoteVersion} دستیاب ہے\n(آپ کا ورژن: ${update.localVersion})'
+                ? 'ورژن ${update.remoteVersion} دستیاب ہے\n(انسٹال: ${update.localVersion})'
                 : 'Version ${update.remoteVersion} is available\n(Installed: ${update.localVersion})',
             style: const TextStyle(color: Colors.grey, fontSize: 13),
           ),
@@ -273,7 +122,7 @@ class UpdateDialog extends StatelessWidget {
               ),
               child: Text(
                 update.releaseNotes,
-                style: const TextStyle(fontSize: 13),
+                style: const TextStyle(fontSize: 12),
               ),
             ),
           ],
@@ -297,12 +146,14 @@ class UpdateDialog extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           ),
-          onPressed: () async {
+          onPressed: () {
             Navigator.pop(context); // close this dialog
-            // Open download progress dialog
-            if (context.mounted) {
-              await UpdateService.downloadAndInstall(context);
-            }
+            // Show download progress dialog
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => const _DownloadProgressDialog(),
+            );
           },
           icon: const Icon(Icons.download, size: 18),
           label: Text(
@@ -311,6 +162,194 @@ class UpdateDialog extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─── Download progress dialog (proper StatefulWidget — starts download once in initState) ──
+class _DownloadProgressDialog extends StatefulWidget {
+  const _DownloadProgressDialog();
+
+  @override
+  State<_DownloadProgressDialog> createState() =>
+      _DownloadProgressDialogState();
+}
+
+class _DownloadProgressDialogState extends State<_DownloadProgressDialog> {
+  double _progress = 0;
+  bool _isComplete = false;
+  bool _isIndeterminate = false; // true when server doesn't send Content-Length
+  String? _error;
+  String? _apkPath;
+
+  @override
+  void initState() {
+    super.initState();
+    // Start download exactly once, in initState — NEVER in build()
+    _startDownload();
+  }
+
+  Future<void> _startDownload() async {
+    try {
+      final client = http.Client();
+      final request = http.Request('GET', Uri.parse(UpdateService.apkUrl));
+      final streamedResponse = await client.send(request);
+
+      final totalBytes = streamedResponse.contentLength ?? 0;
+      int receivedBytes = 0;
+
+      // If no Content-Length header, show indeterminate spinner
+      if (totalBytes == 0 && mounted) {
+        setState(() => _isIndeterminate = true);
+      }
+
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/darzi_pro_update.apk');
+      final sink = file.openWrite();
+
+      await for (final chunk in streamedResponse.stream) {
+        if (!mounted) {
+          sink.close();
+          client.close();
+          return;
+        }
+        sink.add(chunk);
+        receivedBytes += chunk.length;
+        if (totalBytes > 0 && mounted) {
+          setState(() => _progress = receivedBytes / totalBytes);
+        }
+      }
+
+      await sink.flush();
+      await sink.close();
+      client.close();
+
+      _apkPath = file.path;
+      debugPrint('APK downloaded to: $_apkPath');
+
+      if (mounted) {
+        setState(() {
+          _isComplete = true;
+          _progress = 1.0;
+          _isIndeterminate = false;
+        });
+      }
+
+      await Future.delayed(const Duration(milliseconds: 600));
+
+      // Close dialog and open installer
+      if (mounted) {
+        Navigator.pop(context);
+        final result = await OpenFile.open(_apkPath!);
+        debugPrint('OpenFile result: ${result.type} — ${result.message}');
+      }
+    } catch (e) {
+      debugPrint('Download error: $e');
+      if (mounted) {
+        setState(() => _error = 'Download failed.\nPlease try again.');
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isUrdu = HiveService.language == 'ur';
+
+    return AlertDialog(
+      shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Icon
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: (_isComplete ? Colors.green : kPrimary).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              _error != null
+                  ? Icons.error_outline
+                  : _isComplete
+                      ? Icons.check_circle
+                      : Icons.system_update,
+              color: _error != null
+                  ? Colors.red
+                  : _isComplete
+                      ? Colors.green
+                      : kPrimary,
+              size: 36,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Title
+          Text(
+            _error != null
+                ? (isUrdu ? 'خرابی ہوئی' : 'Download Failed')
+                : _isComplete
+                    ? (isUrdu ? 'انسٹال ہو رہا ہے...' : 'Installing...')
+                    : (isUrdu
+                        ? 'اپڈیٹ ڈاؤن لوڈ ہو رہی ہے...'
+                        : 'Downloading Update...'),
+            style:
+                const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+
+          if (_error != null) ...[
+            Text(
+              _error!,
+              style:
+                  const TextStyle(color: Colors.red, fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(isUrdu ? 'بند کریں' : 'Close'),
+            ),
+          ] else ...[
+            // Progress bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                // null value = indeterminate, 0..1 = determinate
+                value: _isIndeterminate ? null : _progress,
+                minHeight: 12,
+                backgroundColor: kPrimary.withOpacity(0.12),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  _isComplete ? Colors.green : kPrimary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              _isIndeterminate
+                  ? (isUrdu ? 'ڈاؤن لوڈ جاری ہے...' : 'Downloading...')
+                  : _isComplete
+                      ? (isUrdu ? 'مکمل ✓' : 'Complete ✓')
+                      : '${(_progress * 100).toInt()}%',
+              style: TextStyle(
+                fontSize: 14,
+                color: kTextSecondary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              isUrdu
+                  ? 'براہ کرم انتظار کریں'
+                  : 'Please keep the app open',
+              style: TextStyle(fontSize: 11, color: kTextSecondary),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

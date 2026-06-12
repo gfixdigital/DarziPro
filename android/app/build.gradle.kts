@@ -27,9 +27,11 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Signing with debug keys (update before production Play Store release)
             signingConfig = signingConfigs.getByName("debug")
+            // Disable R8 shrinking/obfuscation to prevent OOM on low-RAM builds
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }
