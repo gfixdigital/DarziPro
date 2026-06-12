@@ -195,6 +195,10 @@ class _DownloadProgressDialogState extends State<_DownloadProgressDialog> {
       final request = http.Request('GET', Uri.parse(UpdateService.apkUrl));
       final streamedResponse = await client.send(request);
 
+      if (streamedResponse.statusCode != 200) {
+        throw HttpException('Status code: ${streamedResponse.statusCode}');
+      }
+
       final totalBytes = streamedResponse.contentLength ?? 0;
       int receivedBytes = 0;
 
