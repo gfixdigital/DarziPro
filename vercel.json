@@ -4,7 +4,7 @@
   "outputDirectory": "build/web",
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!.*\\.).*)",
       "destination": "/index.html"
     }
   ]
