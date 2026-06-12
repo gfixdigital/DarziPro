@@ -121,8 +121,85 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       if (mounted) context.read<SyncProvider>().syncNow();
 
       if (mounted) {
-        _snack('Order #${order.orderNumber} created!');
-        Navigator.pushReplacementNamed(context, '/orders/${order.id}');
+        final isUrdu = HiveService.language == 'ur';
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE8F5E9),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_circle,
+                    color: Color(0xFF2E7D32),
+                    size: 44,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  isUrdu ? 'آرڈر محفوظ ہو گیا!' : 'Order Saved!',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '#${order.orderNumber}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF1A56DB),
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isUrdu
+                      ? 'آرڈر کامیابی سے محفوظ کر لیا گیا'
+                      : 'Your order has been created successfully',
+                  style: const TextStyle(color: Colors.grey, fontSize: 13),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+            actionsAlignment: MainAxisAlignment.center,
+            actions: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kPrimary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 32, vertical: 12),
+                ),
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(
+                  isUrdu ? 'ٹھیک ہے' : 'View Order',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        );
+
+        // Navigate only after dialog is dismissed
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/orders/${order.id}');
+        }
       }
     } catch (e) {
       if (mounted) _snack('Error: $e', isError: true);
