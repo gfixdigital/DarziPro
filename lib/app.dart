@@ -7,6 +7,7 @@ import 'providers/auth_provider.dart';
 import 'providers/customer_provider.dart';
 import 'providers/order_provider.dart';
 import 'providers/language_provider.dart';
+import 'providers/sync_provider.dart';
 import 'core/services/hive_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
@@ -180,6 +181,17 @@ class _HomeScreenState extends State<_HomeScreen> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+
+    // Wire up post-sync data refresh so UI updates automatically when phone
+    // reconnects to internet and pulls cloud changes (no logout needed)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final syncProvider = context.read<SyncProvider>();
+      syncProvider.onDataRefreshed = () {
+        if (!mounted) return;
+        context.read<OrderProvider>().loadOrders();
+        context.read<CustomerProvider>().loadCustomers();
+      };
+    });
   }
 
   final _screens = const [

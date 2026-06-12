@@ -9,6 +9,9 @@ class SyncProvider extends ChangeNotifier {
   bool _isSyncing = false;
   bool _lastSyncFailed = false;
 
+  /// Called after a successful pull so the app can reload data into providers
+  VoidCallback? onDataRefreshed;
+
   SyncProvider(this._connectivity) {
     _connectivity.onConnectivityRestored = _onConnectivityRestored;
   }
@@ -19,12 +22,12 @@ class SyncProvider extends ChangeNotifier {
   int get pendingCount => HiveService.getUnsyncedCount();
   DateTime? get lastSyncTime => HiveService.lastSyncTime;
 
-  /// Triggered when connectivity is restored
+  /// Triggered automatically when connectivity is restored
   void _onConnectivityRestored() {
     syncNow();
   }
 
-  /// Manually trigger sync
+  /// Manually trigger sync (push local → cloud, then pull cloud → local)
   Future<void> syncNow() async {
     if (_isSyncing || !_connectivity.isOnline) return;
 
@@ -35,13 +38,16 @@ class SyncProvider extends ChangeNotifier {
     try {
       final shopId = HiveService.shopId;
       if (shopId != null) {
-        // Push local changes
+        // Push local changes first
         final pushSuccess = await SyncService.syncAll();
 
-        // Pull latest from cloud
+        // Pull latest from cloud (incremental — only changes since lastSyncTime)
         await SyncService.pullUpdates(shopId);
 
         _lastSyncFailed = !pushSuccess;
+
+        // Notify the app to reload data from Hive into memory (refreshes UI)
+        onDataRefreshed?.call();
       }
     } catch (e) {
       _lastSyncFailed = true;

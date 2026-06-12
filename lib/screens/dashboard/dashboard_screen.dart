@@ -8,6 +8,7 @@ import '../../core/constants/strings.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/url_helper.dart';
 import '../../core/services/hive_service.dart';
+import '../../core/services/update_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/order_provider.dart';
 import '../../providers/customer_provider.dart';
@@ -45,6 +46,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     _refreshData();
     _checkAndroidPrompt();
+    _checkForUpdate();
   }
 
   @override
@@ -71,6 +73,96 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }
       });
     }
+  }
+
+  void _checkForUpdate() {
+    // Only check for updates on Android (web auto-deploys)
+    if (kIsWeb) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final update = await UpdateService.checkForUpdate();
+      if (update != null && mounted) {
+        _showUpdateDialog(update);
+      }
+    });
+  }
+
+  void _showUpdateDialog(UpdateInfo update) {
+    final isUrdu = HiveService.language == 'ur';
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1565C0).withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.system_update, color: Color(0xFF1565C0), size: 28),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              isUrdu ? 'نئی اپڈیٹ دستیاب!' : 'New Update Available!',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              isUrdu
+                  ? 'نیا ورژن ${update.remoteVersion} دستیاب ہے\n(آپ کا ورژن: ${update.localVersion})'
+                  : 'Version ${update.remoteVersion} is available\n(You have: ${update.localVersion})',
+              style: const TextStyle(color: Colors.grey),
+            ),
+            if (update.releaseNotes.isNotEmpty) ...
+              [
+                const SizedBox(height: 12),
+                Text(
+                  update.releaseNotes,
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ],
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.spaceEvenly,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              isUrdu ? 'بعد میں' : 'Later',
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1565C0),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final url = Uri.parse('https://app.gfixdigital.com/app-release.apk');
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              }
+            },
+            icon: const Icon(Icons.download, size: 18),
+            label: Text(
+              isUrdu ? 'ابھی اپڈیٹ کریں' : 'Update Now',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showAndroidDownloadDialog() {
