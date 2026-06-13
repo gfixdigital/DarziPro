@@ -15,6 +15,8 @@ import '../../providers/customer_provider.dart';
 import '../../models/customer.dart';
 import '../../widgets/common/app_button.dart';
 import '../../widgets/common/order_card.dart';
+import '../../widgets/common/custom_pull_to_refresh.dart';
+import '../../providers/sync_provider.dart';
 
 class AppNotification {
   final String title;
@@ -368,9 +370,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final auth = context.watch<AuthProvider>();
     final orders = context.watch<OrderProvider>();
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
+    return CustomPullToRefresh(
+      onRefresh: () async {
+        await context.read<SyncProvider>().syncNow();
+      },
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
@@ -514,8 +521,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 24),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 /// Stat card widget

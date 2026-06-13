@@ -1,1 +1,1 @@
-{ "version": "1.0.4", "build": 5, "releaseNotes": "Auto-sync on resume, database timezones in UTC, and external cache APK storage path." }
+{ "version": "1.0.5", "build": 6, "releaseNotes": "Custom pull-to-refresh scissors animation on the dashboard." }
