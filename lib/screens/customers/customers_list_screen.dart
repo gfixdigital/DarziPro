@@ -67,37 +67,59 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          width: 64, height: 64,
+                          width: 80,
+                          height: 80,
                           decoration: BoxDecoration(
-                            color: kPrimaryLight, shape: BoxShape.circle,
+                            color: kPrimary.withOpacity(0.05),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: kPrimary.withOpacity(0.1), width: 2),
                           ),
-                          child: Icon(Icons.people_outline,
-                              color: kPrimary.withOpacity(0.5), size: 32),
+                          child: Icon(
+                            Icons.people_outline,
+                            color: kPrimary.withOpacity(0.6),
+                            size: 36,
+                          ),
                         ),
-                        const SizedBox(height: 16),
-                        Text(AppStrings.noCustomersYet,
-                            style: AppTextStyles.bodyMd.copyWith(fontWeight: FontWeight.w600)),
-                        const SizedBox(height: 4),
-                        Text(AppStrings.addFirstCustomer, style: AppTextStyles.bodySm),
+                        const SizedBox(height: 20),
+                        Text(
+                          AppStrings.noCustomersYet,
+                          style: AppTextStyles.bodyLg.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: kTextPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          AppStrings.addFirstCustomer,
+                          style: AppTextStyles.bodySm.copyWith(color: kTextSecondary),
+                        ),
                       ],
                     ),
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 80),
-                    itemCount: customerProv.customers.length,
-                    itemBuilder: (context, index) {
-                      final customer = customerProv.customers[index];
-                      final orders = orderProv.getOrdersForCustomer(customer.id);
-                      final lastOrder = orders.isNotEmpty ? orders.first.orderDate : null;
-                      return CustomerCard(
-                        customer: customer,
-                        orderCount: orders.length,
-                        lastOrderDate: lastOrder,
-                        onTap: () => Navigator.pushNamed(
-                          context, '/customers/${customer.id}',
-                        ),
-                      );
+                : RefreshIndicator(
+                    color: kPrimary,
+                    backgroundColor: Colors.white,
+                    onRefresh: () async {
+                      context.read<CustomerProvider>().loadCustomers();
                     },
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 80),
+                      itemCount: customerProv.customers.length,
+                      itemBuilder: (context, index) {
+                        final customer = customerProv.customers[index];
+                        final orders = orderProv.getOrdersForCustomer(customer.id);
+                        final lastOrder = orders.isNotEmpty ? orders.first.orderDate : null;
+                        return CustomerCard(
+                          customer: customer,
+                          orderCount: orders.length,
+                          lastOrderDate: lastOrder,
+                          onTap: () => Navigator.pushNamed(
+                            context, '/customers/${customer.id}',
+                          ),
+                        );
+                      },
+                    ),
                   ),
           ),
         ],

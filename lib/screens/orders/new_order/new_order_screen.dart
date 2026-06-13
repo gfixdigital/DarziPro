@@ -302,6 +302,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
         );
       case 2:
         return Step3Style(
+          customerId: _customerId,
           stylePreference: _style,
           onSave: _onStep3,
           onBack: () => setState(() => _step = 1),

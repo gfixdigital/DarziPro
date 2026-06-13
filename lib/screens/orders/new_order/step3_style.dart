@@ -5,13 +5,17 @@ import '../../../core/constants/strings.dart';
 import '../../../models/style_preference.dart';
 import '../../../widgets/common/app_button.dart';
 
+import '../../../core/services/hive_service.dart';
+
 class Step3Style extends StatefulWidget {
+  final String? customerId;
   final StylePreference stylePreference;
   final Function(StylePreference) onSave;
   final VoidCallback onBack;
 
   const Step3Style({
     super.key,
+    this.customerId,
     required this.stylePreference,
     required this.onSave,
     required this.onBack,
@@ -35,16 +39,40 @@ class _Step3StyleState extends State<Step3Style> {
   @override
   void initState() {
     super.initState();
+    // Load from previous style first
+    _loadPreviousStyle();
+    // Then override with whatever was already selected in the wizard
+    _loadCurrentValues();
+  }
+
+  void _loadPreviousStyle() {
+    if (widget.customerId == null) return;
+    final prev = HiveService.getLatestStyleForCustomer(widget.customerId!);
+    if (prev == null) return;
+
+    if (prev.collar != null) _collar = prev.collar;
+    if (prev.pockets.isNotEmpty) _pockets = List.from(prev.pockets);
+    if (prev.daman != null) _daman = prev.daman;
+    if (prev.cuffs != null) _cuffs = prev.cuffs;
+    _silkThread = prev.silkThread;
+    if (prev.stitching != null) _stitching = prev.stitching;
+    if (prev.buttons != null) _buttons = prev.buttons;
+    if (prev.suitStyle.isNotEmpty) _suitStyle = List.from(prev.suitStyle);
+    if (prev.shalwarStyle != null) _shalwarStyle = prev.shalwarStyle;
+  }
+
+  void _loadCurrentValues() {
     final sp = widget.stylePreference;
-    _collar = sp.collar;
-    _pockets = List.from(sp.pockets);
-    _daman = sp.daman;
-    _cuffs = sp.cuffs;
-    _silkThread = sp.silkThread;
-    _stitching = sp.stitching;
-    _buttons = sp.buttons;
-    _suitStyle = List.from(sp.suitStyle);
-    _shalwarStyle = sp.shalwarStyle;
+    if (sp.collar != null) _collar = sp.collar;
+    if (sp.pockets.isNotEmpty) _pockets = List.from(sp.pockets);
+    if (sp.daman != null) _daman = sp.daman;
+    if (sp.cuffs != null) _cuffs = sp.cuffs;
+    // Silk thread can override if sp explicitly has true
+    if (sp.silkThread) _silkThread = sp.silkThread;
+    if (sp.stitching != null) _stitching = sp.stitching;
+    if (sp.buttons != null) _buttons = sp.buttons;
+    if (sp.suitStyle.isNotEmpty) _suitStyle = List.from(sp.suitStyle);
+    if (sp.shalwarStyle != null) _shalwarStyle = sp.shalwarStyle;
   }
 
   StylePreference _buildStyle() {

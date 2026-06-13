@@ -102,22 +102,30 @@ class Order extends HiveObject {
       };
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
-        id: json['id'] as String,
-        shopId: json['shop_id'] as String,
-        customerId: json['customer_id'] as String,
-        orderNumber: json['order_number'] as String,
-        garmentType: json['garment_type'] as String,
-        orderDate: DateTime.parse(json['order_date'] as String),
-        deliveryDate: DateTime.parse(json['delivery_date'] as String),
+        id: json['id'] as String? ?? '',
+        shopId: json['shop_id'] as String? ?? '',
+        customerId: json['customer_id'] as String? ?? '',
+        orderNumber: json['order_number'] as String? ?? '',
+        garmentType: json['garment_type'] as String? ?? '',
+        orderDate: json['order_date'] != null 
+            ? DateTime.tryParse(json['order_date'].toString()) ?? DateTime.now() 
+            : DateTime.now(),
+        deliveryDate: json['delivery_date'] != null 
+            ? DateTime.tryParse(json['delivery_date'].toString()) ?? DateTime.now().add(const Duration(days: 7)) 
+            : DateTime.now().add(const Duration(days: 7)),
         isUrgent: json['is_urgent'] as bool? ?? false,
         status: json['status'] as String? ?? 'pending',
-        totalAmount: (json['total_amount'] as num).toDouble(),
-        advancePaid: (json['advance_paid'] as num?)?.toDouble() ?? 0,
+        totalAmount: (json['total_amount'] as num?)?.toDouble() ?? 0.0,
+        advancePaid: (json['advance_paid'] as num?)?.toDouble() ?? 0.0,
         balancePaid: json['balance_paid'] as bool? ?? false,
         fabricNotes: json['fabric_notes'] as String?,
         orderNotes: json['order_notes'] as String?,
-        createdAt: DateTime.parse(json['created_at'] as String),
-        updatedAt: DateTime.parse(json['updated_at'] as String),
+        createdAt: json['created_at'] != null 
+            ? DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now() 
+            : DateTime.now(),
+        updatedAt: json['updated_at'] != null 
+            ? DateTime.tryParse(json['updated_at'].toString()) ?? DateTime.now() 
+            : DateTime.now(),
         isDeleted: json['is_deleted'] as bool? ?? false,
         isSynced: true,
       );

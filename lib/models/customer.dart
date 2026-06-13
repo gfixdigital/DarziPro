@@ -60,14 +60,18 @@ class Customer extends HiveObject {
       };
 
   factory Customer.fromJson(Map<String, dynamic> json) => Customer(
-        id: json['id'] as String,
-        shopId: json['shop_id'] as String,
-        name: json['name'] as String,
-        phone: json['phone'] as String,
+        id: json['id'] as String? ?? '',
+        shopId: json['shop_id'] as String? ?? '',
+        name: json['name'] as String? ?? 'Unknown',
+        phone: json['phone'] as String? ?? '',
         address: json['address'] as String?,
         notes: json['notes'] as String?,
-        createdAt: DateTime.parse(json['created_at'] as String),
-        updatedAt: DateTime.parse(json['updated_at'] as String),
+        createdAt: json['created_at'] != null 
+            ? DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now() 
+            : DateTime.now(),
+        updatedAt: json['updated_at'] != null 
+            ? DateTime.tryParse(json['updated_at'].toString()) ?? DateTime.now() 
+            : DateTime.now(),
         isDeleted: json['is_deleted'] as bool? ?? false,
         isSynced: true,
       );

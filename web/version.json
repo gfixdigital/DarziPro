@@ -1,1 +1,1 @@
-{ "version": "1.0.8", "build": 9, "releaseNotes": "Premium UI polish: gradient cards, animated order/customer cards with press effect, gradient nav bar, and richer dashboard." }
+{ "version": "1.0.9", "build": 10, "releaseNotes": "Critical fix: Addressed pull-to-refresh UI issues, null safety crash fixes in cloud sync resulting in missing orders, and fixed styles missing on order creation." }

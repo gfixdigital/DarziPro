@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/strings.dart';
@@ -266,9 +267,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Center(
             child: Column(
               children: [
-                Text(
-                  'Darzi Pro ${AppStrings.appVersion}',
-                  style: AppTextStyles.labelSm.copyWith(color: kTextSecondary.withOpacity(0.5)),
+                FutureBuilder<PackageInfo>(
+                  future: PackageInfo.fromPlatform(),
+                  builder: (context, snapshot) {
+                    final version = snapshot.hasData
+                        ? 'v${snapshot.data!.version} (Build ${snapshot.data!.buildNumber})'
+                        : 'v1.0.0';
+                    return Text(
+                      'Darzi Pro $version',
+                      style: AppTextStyles.labelSm.copyWith(color: kTextSecondary.withOpacity(0.5)),
+                    );
+                  },
                 ),
                 const SizedBox(height: 4),
                 Text(

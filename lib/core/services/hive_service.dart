@@ -308,6 +308,24 @@ class HiveService {
     }
   }
 
+  static StylePreference? getLatestStyleForCustomer(String customerId) {
+    // First check the customer-level default style
+    final defaultKey = 'customer_default_$customerId';
+    try {
+      final defS = stylePrefsBoxInstance.values
+          .firstWhere((s) => s.orderId == defaultKey);
+      return defS;
+    } catch (_) {}
+    // Fallback: find from orders
+    final customerOrders = getOrdersForCustomer(customerId);
+    if (customerOrders.isEmpty) return null;
+    for (final order in customerOrders) {
+      final style = getStyleForOrder(order.id);
+      if (style != null) return style;
+    }
+    return null;
+  }
+
   static Future<void> saveStylePreference(StylePreference pref) async {
     await stylePrefsBoxInstance.put(pref.id, pref);
   }

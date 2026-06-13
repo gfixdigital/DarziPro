@@ -101,50 +101,60 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          width: 64,
-                          height: 64,
+                          width: 80,
+                          height: 80,
                           decoration: BoxDecoration(
-                            color: kPrimaryLight,
+                            color: kPrimary.withOpacity(0.05),
                             shape: BoxShape.circle,
+                            border: Border.all(color: kPrimary.withOpacity(0.1), width: 2),
                           ),
                           child: Icon(
                             Icons.receipt_long_outlined,
-                            color: kPrimary.withOpacity(0.5),
-                            size: 32,
+                            color: kPrimary.withOpacity(0.6),
+                            size: 36,
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 20),
                         Text(
                           'No orders found',
-                          style: AppTextStyles.bodyMd.copyWith(
-                            fontWeight: FontWeight.w600,
+                          style: AppTextStyles.bodyLg.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: kTextPrimary,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Text(
                           'Create a new order to get started',
-                          style: AppTextStyles.bodySm,
+                          style: AppTextStyles.bodySm.copyWith(color: kTextSecondary),
                         ),
                       ],
                     ),
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 80),
-                    itemCount: orderProvider.orders.length,
-                    itemBuilder: (context, index) {
-                      final order = orderProvider.orders[index];
-                      final customer = context
-                          .read<CustomerProvider>()
-                          .getCustomerById(order.customerId);
-                      return OrderCard(
-                        order: order,
-                        customer: customer,
-                        onTap: () => Navigator.pushNamed(
-                          context,
-                          '/orders/${order.id}',
-                        ),
-                      );
+                : RefreshIndicator(
+                    color: kPrimary,
+                    backgroundColor: Colors.white,
+                    onRefresh: () async {
+                      context.read<OrderProvider>().loadOrders();
                     },
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 80),
+                      itemCount: orderProvider.orders.length,
+                      itemBuilder: (context, index) {
+                        final order = orderProvider.orders[index];
+                        final customer = context
+                            .read<CustomerProvider>()
+                            .getCustomerById(order.customerId);
+                        return OrderCard(
+                          order: order,
+                          customer: customer,
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            '/orders/${order.id}',
+                          ),
+                        );
+                      },
+                    ),
                   ),
           ),
         ],

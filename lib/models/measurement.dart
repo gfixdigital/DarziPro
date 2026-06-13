@@ -85,9 +85,9 @@ class Measurement extends HiveObject {
       };
 
   factory Measurement.fromJson(Map<String, dynamic> json) => Measurement(
-        id: json['id'] as String,
-        orderId: json['order_id'] as String,
-        shopId: json['shop_id'] as String,
+        id: json['id'] as String? ?? '',
+        orderId: json['order_id'] as String? ?? '',
+        shopId: json['shop_id'] as String? ?? '',
         kameezLength: (json['kameez_length'] as num?)?.toDouble(),
         sleeve: (json['sleeve'] as num?)?.toDouble(),
         shoulder: (json['shoulder'] as num?)?.toDouble(),

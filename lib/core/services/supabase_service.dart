@@ -43,7 +43,7 @@ class SupabaseService {
 
   /// Upsert data to a table
   static Future<void> upsert(String table, Map<String, dynamic> data) async {
-    await client.from(table).upsert(data);
+    await client.from(table).upsert(data).timeout(const Duration(seconds: 15));
   }
 
   /// Fetch all data for a shop from a table
@@ -58,7 +58,7 @@ class SupabaseService {
       query = query.gte('updated_at', since.toUtc().toIso8601String());
     }
 
-    final response = await query;
+    final response = await query.timeout(const Duration(seconds: 15));
     return List<Map<String, dynamic>>.from(response);
   }
 

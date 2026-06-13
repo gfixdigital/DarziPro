@@ -76,9 +76,9 @@ class StylePreference extends HiveObject {
 
   factory StylePreference.fromJson(Map<String, dynamic> json) =>
       StylePreference(
-        id: json['id'] as String,
-        orderId: json['order_id'] as String,
-        shopId: json['shop_id'] as String,
+        id: json['id'] as String? ?? '',
+        orderId: json['order_id'] as String? ?? '',
+        shopId: json['shop_id'] as String? ?? '',
         collar: json['collar'] as String?,
         pockets: (json['pockets'] as List<dynamic>?)
                 ?.map((e) => e as String)
