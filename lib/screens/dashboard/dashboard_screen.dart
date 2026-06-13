@@ -380,9 +380,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
-          // Top bar
+          // Premium Top bar
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -390,12 +390,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${getGreeting()},',
-                    style: AppTextStyles.bodySm,
+                    '${getGreeting()} 👋',
+                    style: AppTextStyles.bodySm.copyWith(
+                      color: kTextSecondary,
+                      letterSpacing: 0.3,
+                    ),
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     auth.ownerName,
-                    style: AppTextStyles.headlineSm,
+                    style: AppTextStyles.headlineSm.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                    ),
                   ),
                 ],
               ),
@@ -403,24 +410,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   _buildNotificationBell(context),
                   const SizedBox(width: 8),
-                  // Profile avatar
+                  // Premium profile avatar with gradient
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: 46,
+                    height: 46,
                     decoration: BoxDecoration(
-                      color: kPrimaryLight,
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: kPrimary.withOpacity(0.15),
-                        width: 1.5,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [kPrimary, kPrimaryDark],
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: kPrimary.withOpacity(0.35),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Center(
                       child: Text(
                         getInitials(auth.ownerName),
                         style: AppTextStyles.labelLg.copyWith(
-                          color: kPrimary,
+                          color: Colors.white,
                           fontSize: 16,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
@@ -482,16 +497,53 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           const SizedBox(height: 28),
 
-          // Recent Orders
+          // Premium section header: Recent Orders
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(AppStrings.recentOrders, style: AppTextStyles.headlineSm),
+              Row(
+                children: [
+                  Text(AppStrings.recentOrders,
+                      style: AppTextStyles.headlineSm.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.3,
+                      )),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: kPrimary.withOpacity(0.09),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${orders.recentOrders.length}',
+                      style: AppTextStyles.labelSm.copyWith(
+                        color: kPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               TextButton(
-                onPressed: () => Navigator.pushNamed(context, '/orders'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 6),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: BorderSide(
+                        color: kPrimary.withOpacity(0.2)),
+                  ),
+                ),
+                onPressed: () =>
+                    Navigator.pushNamed(context, '/orders'),
                 child: Text(
                   AppStrings.viewAll,
-                  style: AppTextStyles.labelLg.copyWith(color: kPrimary),
+                  style: AppTextStyles.labelSm.copyWith(
+                    color: kPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -526,7 +578,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 }
 
-/// Stat card widget
+/// Premium Stat Card with gradient icon box and deeper shadow
 class _StatCard extends StatelessWidget {
   final String title;
   final String value;
@@ -543,38 +595,66 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: kPrimaryLight,
-        borderRadius: BorderRadius.circular(16),
+        color: kSurface,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: kPrimary.withOpacity(0.08),
+          color: color.withOpacity(0.1),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.08),
+            blurRadius: 16,
+            spreadRadius: 0,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(8),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [color, color.withOpacity(0.6)],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
-            child: Icon(icon, color: color, size: 20),
+            child: Icon(icon, color: Colors.white, size: 22),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Text(
             value,
             style: AppTextStyles.headlineMd.copyWith(
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
           Text(
             title,
-            style: AppTextStyles.labelSm,
+            style: AppTextStyles.labelSm.copyWith(
+              color: kTextSecondary,
+              letterSpacing: 0.2,
+            ),
           ),
         ],
       ),
@@ -582,7 +662,7 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-/// Payments due card
+/// Premium Payments Due card with gradient + subtle shine
 class _PaymentsDueCard extends StatelessWidget {
   final double amount;
 
@@ -592,47 +672,99 @@ class _PaymentsDueCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: kPrimary,
-        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [kPrimary, kPrimaryDark],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: kPrimary.withOpacity(0.4),
+            blurRadius: 20,
+            spreadRadius: 0,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
-      child: Row(
+      child: Stack(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.account_balance_wallet_outlined,
-              color: Colors.white,
-              size: 22,
+          // Decorative shine circle (top-right)
+          Positioned(
+            top: -20,
+            right: -10,
+            child: Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.06),
+                shape: BoxShape.circle,
+              ),
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppStrings.paymentsDue,
-                  style: AppTextStyles.labelSm.copyWith(
-                    color: Colors.white.withOpacity(0.7),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  formatCurrency(amount),
-                  style: AppTextStyles.headlineSm.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
+          Positioned(
+            bottom: -30,
+            right: 40,
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.04),
+                shape: BoxShape.circle,
+              ),
             ),
+          ),
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.2),
+                  ),
+                ),
+                child: const Icon(
+                  Icons.account_balance_wallet_outlined,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppStrings.paymentsDue,
+                      style: AppTextStyles.labelSm.copyWith(
+                        color: Colors.white.withOpacity(0.75),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      formatCurrency(amount),
+                      style: AppTextStyles.headlineSm.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 22,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.white.withOpacity(0.5),
+                size: 14,
+              ),
+            ],
           ),
         ],
       ),
@@ -640,7 +772,7 @@ class _PaymentsDueCard extends StatelessWidget {
   }
 }
 
-/// Empty state widget
+/// Premium Empty State
 class _EmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -656,29 +788,45 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 40),
+        padding: const EdgeInsets.symmetric(vertical: 48),
         child: Column(
           children: [
             Container(
-              width: 64,
-              height: 64,
+              width: 72,
+              height: 72,
               decoration: BoxDecoration(
-                color: kPrimaryLight,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [kPrimaryLight, kSurface],
+                ),
                 shape: BoxShape.circle,
+                border: Border.all(
+                  color: kPrimary.withOpacity(0.1),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: kPrimary.withOpacity(0.08),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              child: Icon(icon, color: kPrimary.withOpacity(0.5), size: 32),
+              child: Icon(icon, color: kPrimary.withOpacity(0.4), size: 32),
             ),
             const SizedBox(height: 16),
             Text(
               title,
               style: AppTextStyles.bodyMd.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.2,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               subtitle,
-              style: AppTextStyles.bodySm,
+              style: AppTextStyles.bodySm.copyWith(color: kTextSecondary),
               textAlign: TextAlign.center,
             ),
           ],

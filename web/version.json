@@ -1,1 +1,1 @@
-{ "version": "1.0.7", "build": 8, "releaseNotes": "OTA download now shows Connecting... spinner immediately, then live MB progress bar." }
+{ "version": "1.0.8", "build": 9, "releaseNotes": "Premium UI polish: gradient cards, animated order/customer cards with press effect, gradient nav bar, and richer dashboard." }
