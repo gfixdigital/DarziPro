@@ -43,7 +43,8 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
         color: kPrimary,
         backgroundColor: Colors.white,
         onRefresh: () async {
-          await context.read<OrderProvider>().loadOrders();
+          context.read<OrderProvider>().loadOrders();
+          await Future.delayed(const Duration(milliseconds: 500));
         },
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
