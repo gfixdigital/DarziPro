@@ -70,31 +70,32 @@ class _OrderCardState extends State<OrderCard>
           scale: _scaleAnim.value,
           child: child,
         ),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 14),
-          decoration: BoxDecoration(
-            color: kSurface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: order.isUrgent
-                  ? kAccentGold.withOpacity(0.35)
-                  : kPrimary.withOpacity(0.07),
-              width: order.isUrgent ? 1.5 : 1,
+        child: IntrinsicHeight(
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 14),
+            decoration: BoxDecoration(
+              color: kSurface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: order.isUrgent
+                    ? kAccentGold.withOpacity(0.35)
+                    : kPrimary.withOpacity(0.07),
+                width: order.isUrgent ? 1.5 : 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: kPrimary.withOpacity(0.06),
+                  blurRadius: 16,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
             ),
-            boxShadow: [
-              BoxShadow(
-                color: kPrimary.withOpacity(0.06),
-                blurRadius: 16,
-                spreadRadius: 0,
-                offset: const Offset(0, 4),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Stack(
@@ -338,6 +339,7 @@ class _OrderCardState extends State<OrderCard>
               ],
             ),
           ),
+        ),
         ),
       ),
     );
