@@ -1,1 +1,1 @@
-{ "version": "1.1.0", "build": 11, "releaseNotes": "Critical sync fix: Resolved infinite syncing loops on startup/web-focus and fixed dashboard rendering loops." }
+{ "version": "1.1.0", "build": 12, "releaseNotes": "UI/UX Upgrade: Redesigned the navigation bar to be more stable, user-friendly, and added an animated selection indicator." }

@@ -63,95 +63,83 @@ class _FloatingNavBar extends StatelessWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
         child: Container(
-          height: 68,
+          height: 72,
           decoration: BoxDecoration(
             color: kSurface,
-            borderRadius: BorderRadius.circular(36),
+            borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: kPrimary.withOpacity(0.06),
-              width: 1,
+              color: kPrimary.withOpacity(0.08),
+              width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.10),
-                blurRadius: 28,
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 20,
                 spreadRadius: 0,
-                offset: const Offset(0, 8),
-              ),
-              BoxShadow(
-                color: kPrimary.withOpacity(0.06),
-                blurRadius: 12,
-                offset: const Offset(0, 3),
+                offset: const Offset(0, 6),
               ),
             ],
           ),
-          child: Row(
-            children: List.generate(items.length, (index) {
-              final item = items[index];
-              final isActive = currentIndex == index;
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Row(
+              children: List.generate(items.length, (index) {
+                final item = items[index];
+                final isActive = currentIndex == index;
 
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => onTabChanged(index),
-                  behavior: HitTestBehavior.opaque,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeInOut,
-                    margin: const EdgeInsets.symmetric(
-                        horizontal: 6, vertical: 8),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 4, vertical: 6),
-                    decoration: BoxDecoration(
-                      gradient: isActive
-                          ? LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [kPrimary, kPrimaryDark],
-                            )
-                          : null,
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: isActive
-                          ? [
-                              BoxShadow(
-                                color: kPrimary.withOpacity(0.35),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ]
-                          : [],
-                    ),
-                    child: Row(
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => onTabChanged(index),
+                    behavior: HitTestBehavior.opaque,
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          isActive ? item.activeIcon : item.icon,
-                          color: isActive ? Colors.white : kTextSecondary,
-                          size: 22,
-                        ),
-                        // Show label text only on active tab
-                        if (isActive) ...[
-                          const SizedBox(width: 5),
-                          Flexible(
-                            child: Text(
-                              item.label,
-                              style: AppTextStyles.labelSm.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 11,
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            AnimatedScale(
+                              scale: isActive ? 1.0 : 0.0,
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeOutBack,
+                              child: Container(
+                                width: 48,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                  color: kPrimary.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
                               ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
                             ),
+                            Icon(
+                              isActive ? item.activeIcon : item.icon,
+                              color: isActive ? kPrimary : kTextSecondary,
+                              size: 22,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 150),
+                          style: AppTextStyles.labelSm.copyWith(
+                            color: isActive ? kPrimary : kTextSecondary,
+                            fontWeight: isActive ? FontWeight.w800 : FontWeight.w500,
+                            fontSize: 10,
                           ),
-                        ],
+                          child: Text(
+                            item.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ),
-              );
-            }),
+                );
+              }),
+            ),
           ),
         ),
       ),
