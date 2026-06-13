@@ -61,6 +61,16 @@ class HiveService {
   static set lastSyncTime(DateTime? value) =>
       settings.put('last_sync_time', value);
 
+  static DateTime? get subscriptionEndsAt {
+    final val = settings.get('subscription_ends_at');
+    if (val is DateTime) return val;
+    if (val is String) return DateTime.tryParse(val);
+    return null;
+  }
+
+  static set subscriptionEndsAt(DateTime? value) =>
+      settings.put('subscription_ends_at', value?.toIso8601String());
+
   static bool get newOrderAlerts => settings.get('new_order_alerts', defaultValue: true) as bool;
   static set newOrderAlerts(bool value) => settings.put('new_order_alerts', value);
 

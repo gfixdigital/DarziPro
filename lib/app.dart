@@ -10,6 +10,7 @@ import 'providers/sync_provider.dart';
 import 'core/services/hive_service.dart';
 import 'core/services/realtime_service.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/auth/subscription_expired_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/orders/orders_list_screen.dart';
 import 'screens/orders/order_detail_screen.dart';
@@ -23,6 +24,7 @@ import 'screens/settings/settings_screen.dart';
 import 'screens/settings/shop_report_screen.dart';
 import 'screens/settings/audit_logs_screen.dart';
 import 'widgets/layout/main_scaffold.dart';
+import 'providers/auth_provider.dart';
 
 class DarziProApp extends StatelessWidget {
   const DarziProApp({super.key});
@@ -30,10 +32,19 @@ class DarziProApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final languageProvider = context.watch<LanguageProvider>();
+    final authProvider = context.watch<AuthProvider>();
     final isUrdu = languageProvider.isUrdu;
+    // Use synchronous Hive check so initialRoute resolves instantly without flashing the login screen
     final isAuth = (HiveService.authToken?.isNotEmpty ?? false);
+    final isExpired = authProvider.isExpired;
 
     return MaterialApp(
+      builder: (context, child) {
+        if (isAuth && isExpired) {
+          return const SubscriptionExpiredScreen();
+        }
+        return child!;
+      },
       title: 'Darzi Pro',
       debugShowCheckedModeBanner: false,
       locale: isUrdu ? const Locale('ur') : const Locale('en'),

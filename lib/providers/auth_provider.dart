@@ -17,13 +17,42 @@ class AuthProvider extends ChangeNotifier {
   String get ownerName => HiveService.ownerName ?? 'Darzi';
   String get shopName => HiveService.shopName ?? 'Darzi Pro';
 
+  bool get isExpired {
+    final endsAt = HiveService.subscriptionEndsAt;
+    // If no date is set, we assume they are NOT expired (safe fallback)
+    if (endsAt == null) return false;
+    return DateTime.now().isAfter(endsAt);
+  }
+
   /// Check if user is already authenticated (app restart)
   Future<void> checkAuth() async {
     final token = HiveService.authToken;
     if (token != null && token.isNotEmpty) {
       _isAuthenticated = true;
       notifyListeners();
+      
+      // Perform a background network check for plan validity
+      _syncSubscriptionStatus();
     }
+  }
+
+  Future<void> _syncSubscriptionStatus() async {
+    try {
+      final shopId = HiveService.shopId;
+      if (shopId != null && shopId.isNotEmpty) {
+        final shopData = await SupabaseService.fetchShop(shopId);
+        if (shopData != null) {
+          final dateStr = shopData['subscription_ends_at'] as String?;
+          if (dateStr != null) {
+            final oldStatus = isExpired;
+            HiveService.subscriptionEndsAt = DateTime.tryParse(dateStr);
+            if (isExpired != oldStatus) {
+              notifyListeners(); // Force a UI update if their plan just expired
+            }
+          }
+        }
+      }
+    } catch (_) {}
   }
 
   /// Login with phone and password
@@ -71,6 +100,12 @@ class AuthProvider extends ChangeNotifier {
           if (shopData != null) {
             HiveService.shopName = shopData['name'] as String?;
             HiveService.ownerName = shopData['owner_name'] as String?;
+            
+            final dateStr = shopData['subscription_ends_at'] as String?;
+            if (dateStr != null) {
+              HiveService.subscriptionEndsAt = DateTime.tryParse(dateStr);
+            }
+
             // Normalize phone: strip +92/92 prefix before storing
             final rawPhone = (shopData['phone'] as String? ?? '');
             HiveService.contactNumber = rawPhone
@@ -80,8 +115,6 @@ class AuthProvider extends ChangeNotifier {
           }
 
           // CRITICAL FIX: Clear stale local data before pulling from cloud.
-          // This ensures that when logging in on phone or web, you always see
-          // the correct authoritative cloud data instead of stale/duplicate local data.
           await HiveService.ordersBoxInstance.clear();
           await HiveService.customersBoxInstance.clear();
           await HiveService.measurementsBoxInstance.clear();
