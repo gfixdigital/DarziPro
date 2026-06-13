@@ -48,6 +48,10 @@ class _OrderCardState extends State<OrderCard>
     _controller.dispose();
     super.dispose();
   }
+  String _getMonth(int month) {
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    return months[month - 1];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +59,9 @@ class _OrderCardState extends State<OrderCard>
     final customer = widget.customer;
     final overdue = isOverdue(order.deliveryDate) && order.status != 'delivered';
     final dueToday = isDueToday(order.deliveryDate) && order.status != 'delivered';
-    final statusColor = getStatusColor(order.status);
+    
+    // Status drives the ticket stub color
+    final statusColor = overdue ? kError : (order.isUrgent ? kAccentGold : getStatusColor(order.status));
 
     return GestureDetector(
       onTapDown: (_) => _controller.forward(),
@@ -70,295 +76,183 @@ class _OrderCardState extends State<OrderCard>
           scale: _scaleAnim.value,
           child: child,
         ),
-        child: IntrinsicHeight(
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 14),
-            decoration: BoxDecoration(
-              color: kSurface,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: order.isUrgent
-                    ? kAccentGold.withOpacity(0.35)
-                    : kPrimary.withOpacity(0.07),
-                width: order.isUrgent ? 1.5 : 1,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: kSurface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: kPrimary.withOpacity(0.06),
-                  blurRadius: 16,
-                  spreadRadius: 0,
-                  offset: const Offset(0, 4),
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 4,
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
+            ],
+            border: Border.all(color: kBorder.withOpacity(0.3), width: 1.5),
+          ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Stack(
-              children: [
-                // Subtle status tint in top-right corner
-                Positioned(
-                  top: -20,
-                  right: -20,
-                  child: Container(
-                    width: 80,
-                    height: 80,
+            borderRadius: BorderRadius.circular(16),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // --- LEFT COLUMN: TICKET STUB (Bold Date & Order Number) ---
+                  Container(
+                    width: 85,
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.05),
-                      shape: BoxShape.circle,
+                      color: statusColor,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '${order.deliveryDate.day}',
+                          style: AppTextStyles.headlineLg.copyWith(
+                            color: Colors.white,
+                            fontSize: 32,
+                            height: 1.0,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _getMonth(order.deliveryDate.month),
+                          style: AppTextStyles.labelSm.copyWith(
+                            color: Colors.white.withOpacity(0.9),
+                            letterSpacing: 1.5,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            '#${order.orderNumber}',
+                            style: AppTextStyles.labelSm.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
 
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Left accent bar — urgent=gold, normal=status color
-                    Container(
-                      width: 5,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: order.isUrgent
-                              ? [kAccentGold, kAccentGold.withOpacity(0.6)]
-                              : [statusColor, statusColor.withOpacity(0.4)],
-                        ),
-                      ),
-                    ),
-
-                    // Main content
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Top row: order # + status chip
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 3),
-                                      decoration: BoxDecoration(
-                                        color: kPrimary.withOpacity(0.08),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(Icons.content_cut,
-                                              size: 10, color: kPrimary),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            '#${order.orderNumber}',
-                                            style: AppTextStyles.labelSm.copyWith(
-                                              color: kPrimary,
-                                              fontWeight: FontWeight.w700,
-                                              letterSpacing: 0.5,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                  // --- RIGHT COLUMN: MAIN DETAILS ---
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  customer?.name ?? AppStrings.unknownCustomer,
+                                  style: AppTextStyles.headlineSm.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 18,
+                                    letterSpacing: -0.5,
+                                    color: kTextPrimary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              StatusChip(status: order.status),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            order.garmentType +
+                                (order.fabricNotes != null && order.fabricNotes!.isNotEmpty
+                                    ? ' • ${order.fabricNotes}'
+                                    : ''),
+                            style: AppTextStyles.bodyMd.copyWith(
+                              color: kTextSecondary,
+                              height: 1.3,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'TOTAL AMOUNT',
+                                    style: AppTextStyles.labelSm.copyWith(
+                                      color: kTextSecondary.withOpacity(0.7),
+                                      letterSpacing: 1.2,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
                                     ),
-                                    if (order.isUrgent) ...[
-                                      const SizedBox(width: 6),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 6, vertical: 3),
-                                        decoration: BoxDecoration(
-                                          color: kAccentGold.withOpacity(0.12),
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.bolt,
-                                                size: 10, color: kAccentGold),
-                                            const SizedBox(width: 2),
-                                            Text(
-                                              'URGENT',
-                                              style:
-                                                  AppTextStyles.labelSm.copyWith(
-                                                color: kAccentGold,
-                                                fontWeight: FontWeight.w800,
-                                                fontSize: 9,
-                                                letterSpacing: 0.8,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                                StatusChip(status: order.status),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-
-                            // Customer name
-                            Text(
-                              customer?.name ?? AppStrings.unknownCustomer,
-                              style: AppTextStyles.headlineSm.copyWith(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.1,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-
-                            // Garment type
-                            Text(
-                              order.garmentType +
-                                  (order.fabricNotes != null &&
-                                          order.fabricNotes!.isNotEmpty
-                                      ? ' · ${order.fabricNotes}'
-                                      : ''),
-                              style: AppTextStyles.bodySm.copyWith(
-                                color: kTextSecondary,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 10),
-
-                            // Stitched Sewing Line
-                            Row(
-                              children: List.generate(
-                                32,
-                                (index) => Expanded(
-                                  child: Container(
-                                    height: 1,
-                                    margin: const EdgeInsets.symmetric(horizontal: 1.5),
-                                    color: index % 2 == 0
-                                        ? kBorder.withOpacity(0.5)
-                                        : Colors.transparent,
                                   ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-
-                            // Bottom row: delivery + amount
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Flexible(
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: BoxDecoration(
-                                          color: overdue
-                                              ? kError.withOpacity(0.1)
-                                              : dueToday
-                                                  ? Colors.orange
-                                                      .withOpacity(0.1)
-                                                  : kSurfaceContainer,
-                                          borderRadius:
-                                              BorderRadius.circular(6),
-                                        ),
-                                        child: Icon(
-                                          Icons.calendar_today_outlined,
-                                          size: 12,
-                                          color: overdue
-                                              ? kError
-                                              : dueToday
-                                                  ? Colors.orange
-                                                  : kTextSecondary,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Flexible(
-                                        child: Text(
-                                          overdue
-                                              ? '${AppStrings.overdue} (${formatDate(order.deliveryDate)})'
-                                              : dueToday
-                                                  ? AppStrings.dueToday
-                                                  : formatDate(
-                                                      order.deliveryDate),
-                                          style: AppTextStyles.labelSm.copyWith(
-                                            color: overdue
-                                                ? kError
-                                                : dueToday
-                                                    ? Colors.orange
-                                                    : kTextSecondary,
-                                            fontWeight: overdue || dueToday
-                                                ? FontWeight.w700
-                                                : FontWeight.w500,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                      ),
-                                    ],
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    formatCurrency(order.totalAmount),
+                                    style: AppTextStyles.headlineMd.copyWith(
+                                      color: kPrimary,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: -0.5,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
+                                ],
+                              ),
+                              if (order.status == 'ready' || overdue || dueToday)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: kPrimary.withOpacity(0.07),
+                                    color: overdue
+                                        ? kError.withOpacity(0.1)
+                                        : (dueToday ? Colors.orange.withOpacity(0.1) : kPrimary.withOpacity(0.1)),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Text(
-                                    formatCurrency(order.totalAmount),
-                                    style: AppTextStyles.labelLg.copyWith(
-                                      color: kPrimary,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            if (order.status == 'ready') ...[
-                              const SizedBox(height: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: kPrimary.withOpacity(0.07),
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
-                                    color: kPrimary.withOpacity(0.12),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.notifications_active_outlined,
-                                        size: 12, color: kPrimary),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      AppStrings.awaitingCustomer,
-                                      style: AppTextStyles.labelSm.copyWith(
-                                        color: kPrimary,
-                                        fontWeight: FontWeight.w600,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        overdue
+                                            ? Icons.warning_amber_rounded
+                                            : (dueToday ? Icons.schedule : Icons.check_circle_outline),
+                                        size: 14,
+                                        color: overdue ? kError : (dueToday ? Colors.orange : kPrimary),
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        overdue ? 'OVERDUE' : (dueToday ? 'DUE TODAY' : 'READY'),
+                                        style: AppTextStyles.labelSm.copyWith(
+                                          color: overdue ? kError : (dueToday ? Colors.orange : kPrimary),
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 10,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
                             ],
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
         ),
       ),
     );

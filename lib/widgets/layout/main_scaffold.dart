@@ -21,19 +21,144 @@ class MainScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kBackground,
-      extendBody: true,
-      body: Column(
-        children: [
-          const SyncIndicator(),
-          Expanded(child: body),
-        ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth >= 800;
+
+        return Scaffold(
+          backgroundColor: kBackground,
+          extendBody: !isDesktop,
+          body: isDesktop
+              ? Row(
+                  children: [
+                    _SideNavBar(
+                      currentIndex: currentIndex,
+                      onTabChanged: onTabChanged,
+                    ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          const SyncIndicator(),
+                          Expanded(child: body),
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              : Column(
+                  children: [
+                    const SyncIndicator(),
+                    Expanded(child: body),
+                  ],
+                ),
+          floatingActionButton: floatingActionButton,
+          bottomNavigationBar: isDesktop
+              ? null
+              : _FloatingNavBar(
+                  currentIndex: currentIndex,
+                  onTabChanged: onTabChanged,
+                ),
+        );
+      },
+    );
+  }
+}
+
+class _SideNavBar extends StatelessWidget {
+  final int currentIndex;
+  final ValueChanged<int> onTabChanged;
+
+  const _SideNavBar({
+    required this.currentIndex,
+    required this.onTabChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final items = [
+      _NavData(Icons.dashboard_outlined, Icons.dashboard_rounded, AppStrings.dashboard),
+      _NavData(Icons.receipt_long_outlined, Icons.receipt_long_rounded, AppStrings.orders),
+      _NavData(Icons.people_outline_rounded, Icons.people_rounded, AppStrings.customers),
+      _NavData(Icons.settings_outlined, Icons.settings_rounded, AppStrings.settings),
+    ];
+
+    return Container(
+      width: 280,
+      decoration: BoxDecoration(
+        color: kSurface,
+        border: Border(right: BorderSide(color: kBorder.withOpacity(0.3), width: 1.5)),
       ),
-      floatingActionButton: floatingActionButton,
-      bottomNavigationBar: _FloatingNavBar(
-        currentIndex: currentIndex,
-        onTabChanged: onTabChanged,
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: kPrimary,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: kPrimary.withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(Icons.content_cut, color: Colors.white),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  AppStrings.appName,
+                  style: AppTextStyles.headlineMd.copyWith(color: kPrimary, fontWeight: FontWeight.w900),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 64),
+          ...List.generate(items.length, (index) {
+            final item = items[index];
+            final isActive = currentIndex == index;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: InkWell(
+                onTap: () => onTabChanged(index),
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: isActive ? kPrimary : Colors.transparent,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: isActive ? [
+                      BoxShadow(color: kPrimary.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6))
+                    ] : [],
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        isActive ? item.activeIcon : item.icon,
+                        color: isActive ? Colors.white : kTextSecondary,
+                        size: 26,
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        item.label,
+                        style: AppTextStyles.bodyLg.copyWith(
+                          color: isActive ? Colors.white : kTextSecondary,
+                          fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
       ),
     );
   }

@@ -80,203 +80,204 @@ class _CustomerCardState extends State<CustomerCard>
           child: child,
         ),
         child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: kSurface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isVip
-                  ? kAccentGold.withOpacity(0.3)
-                  : kPrimary.withOpacity(0.07),
-              width: isVip ? 1.5 : 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: isVip
-                    ? kAccentGold.withOpacity(0.06)
-                    : kPrimary.withOpacity(0.05),
-                blurRadius: 16,
-                spreadRadius: 0,
-                offset: const Offset(0, 4),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                // Premium avatar with color + glow
-                Stack(
-                  children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            color,
-                            color.withOpacity(0.7),
-                          ],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: color.withOpacity(0.3),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          getInitials(widget.customer.name),
-                          style: AppTextStyles.labelLg.copyWith(
-                            color: Colors.white,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
+          margin: const EdgeInsets.only(bottom: 28, top: 16),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Main Card Body
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 32, 20, 20),
+                decoration: BoxDecoration(
+                  color: kSurface,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: isVip
+                        ? kAccentGold.withOpacity(0.4)
+                        : kBorder.withOpacity(0.5),
+                    width: isVip ? 1.5 : 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isVip
+                          ? kAccentGold.withOpacity(0.1)
+                          : Colors.black.withOpacity(0.04),
+                      blurRadius: 24,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 10),
                     ),
-                    if (isVip)
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          width: 18,
-                          height: 18,
-                          decoration: BoxDecoration(
-                            color: kAccentGold,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: kSurface, width: 2),
-                          ),
-                          child: const Icon(Icons.star,
-                              size: 10, color: Colors.white),
-                        ),
-                      ),
                   ],
                 ),
-                const SizedBox(width: 14),
-
-                // Customer info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              widget.customer.name,
-                              style: AppTextStyles.bodyMd.copyWith(
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.2,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.customer.name,
+                            style: AppTextStyles.headlineSm.copyWith(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.5,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          if (isVip) ...[
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 7, vertical: 3),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    kAccentGold,
-                                    kAccentGold.withOpacity(0.7)
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                AppStrings.vip,
-                                style: AppTextStyles.labelSm.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 10,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 3),
-                      Row(
-                        children: [
-                          Icon(Icons.phone_outlined,
-                              size: 12, color: kTextSecondary),
-                          const SizedBox(width: 4),
-                          Text(
-                            widget.customer.phone,
-                            style: AppTextStyles.bodySm.copyWith(
-                              color: kTextSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (widget.lastOrderDate != null) ...[
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(Icons.history_outlined,
-                                size: 12, color: kTextSecondary),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${AppStrings.lastOrder}  ${formatDate(widget.lastOrderDate!)}',
-                              style: AppTextStyles.labelSm.copyWith(
-                                color: kTextSecondary,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                            const Spacer(),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 7, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: kPrimaryLight,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                '${widget.orderCount} orders',
-                                style: AppTextStyles.labelSm.copyWith(
-                                  color: kPrimary,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 10,
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
+                        if (isVip)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  kAccentGold,
+                                  kAccentGold.withOpacity(0.8)
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.star, size: 12, color: Colors.white),
+                                const SizedBox(width: 4),
+                                Text(
+                                  AppStrings.vip,
+                                  style: AppTextStyles.labelSm.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                           Icon(Icons.chevron_right_rounded, color: kTextSecondary.withOpacity(0.3), size: 24),
                       ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        // Phone Pill
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: kBackground,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: kBorder.withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.phone_outlined,
+                                  size: 16, color: color),
+                              const SizedBox(width: 8),
+                              Text(
+                                widget.customer.phone,
+                                style: AppTextStyles.labelSm.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: kTextPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Spacer(),
+                        if (widget.lastOrderDate != null)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                AppStrings.lastOrder,
+                                style: AppTextStyles.labelSm.copyWith(
+                                  color: kTextSecondary,
+                                  fontSize: 10,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                formatDate(widget.lastOrderDate!),
+                                style: AppTextStyles.labelSm.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: kTextPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Floating Avatar
+              Positioned(
+                top: -24,
+                left: 24,
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [color, color.withOpacity(0.7)],
+                    ),
+                    border: Border.all(color: kSurface, width: 3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
                     ],
                   ),
+                  child: Center(
+                    child: Text(
+                      getInitials(widget.customer.name),
+                      style: AppTextStyles.labelLg.copyWith(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
                 ),
-                const SizedBox(width: 8),
-                Container(
-                  width: 32,
-                  height: 32,
+              ),
+
+              // Floating Orders Pill
+              Positioned(
+                top: -12,
+                right: 24,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: kPrimaryLight,
-                    borderRadius: BorderRadius.circular(10),
+                    color: kPrimaryDark,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: kSurface, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: kPrimaryDark.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
                   ),
-                  child: const Icon(
-                    Icons.chevron_right_rounded,
-                    color: kPrimary,
-                    size: 20,
+                  child: Text(
+                    '${widget.orderCount} Orders',
+                    style: AppTextStyles.labelSm.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

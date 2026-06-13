@@ -45,78 +45,107 @@ class AppInput extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTextStyles.labelLg),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          validator: validator,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          obscureText: obscureText,
-          maxLines: maxLines,
-          readOnly: readOnly,
-          onTap: onTap,
-          onChanged: onChanged,
-          focusNode: focusNode,
-          autofocus: autofocus,
-          style: AppTextStyles.bodyMd,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: AppTextStyles.bodyMd.copyWith(
-              color: kTextSecondary.withOpacity(0.5),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            label.toUpperCase(),
+            style: AppTextStyles.labelSm.copyWith(
+              color: kTextSecondary,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.2,
+              fontSize: 11,
             ),
-            filled: true,
-            fillColor: kSurfaceContainer,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
-            prefixIcon: prefix != null
-                ? Padding(
-                    padding: const EdgeInsets.only(left: 12, right: 8),
-                    child: prefix,
-                  )
-                : null,
-            prefixIconConstraints: prefix != null
-                ? const BoxConstraints(minWidth: 0, minHeight: 0)
-                : null,
-            suffixIcon: suffix,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: kBorder,
-                width: 1.2,
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: kSurface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: kPrimary.withOpacity(0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
               ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: kBorder,
-                width: 1.2,
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 3,
+                offset: const Offset(0, 1),
               ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: kPrimary,
-                width: 1.8,
+            ],
+          ),
+          child: TextFormField(
+            controller: controller,
+            validator: validator,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
+            obscureText: obscureText,
+            maxLines: maxLines,
+            readOnly: readOnly,
+            onTap: onTap,
+            onChanged: onChanged,
+            focusNode: focusNode,
+            autofocus: autofocus,
+            style: AppTextStyles.bodyMd.copyWith(fontWeight: FontWeight.w600),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: AppTextStyles.bodyMd.copyWith(
+                color: kTextSecondary.withOpacity(0.4),
+                fontWeight: FontWeight.w500,
               ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: kError,
-                width: 1.2,
+              filled: true,
+              fillColor: Colors.transparent,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 18,
               ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: kError,
-                width: 1.8,
+              prefixIcon: prefix != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(left: 16, right: 12),
+                      child: prefix,
+                    )
+                  : null,
+              prefixIconConstraints: prefix != null
+                  ? const BoxConstraints(minWidth: 0, minHeight: 0)
+                  : null,
+              suffixIcon: suffix,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: kBorder.withOpacity(0.3),
+                  width: 1.5,
+                ),
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: kBorder.withOpacity(0.3),
+                  width: 1.5,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(
+                  color: kPrimary,
+                  width: 2.5,
+                ),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(
+                  color: kError,
+                  width: 1.5,
+                ),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(
+                  color: kError,
+                  width: 2.5,
+                ),
+              ),
+              errorStyle: AppTextStyles.labelSm.copyWith(color: kError),
             ),
-            errorStyle: AppTextStyles.labelSm.copyWith(color: kError),
           ),
         ),
       ],

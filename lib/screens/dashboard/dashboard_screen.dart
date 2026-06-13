@@ -318,13 +318,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildNotificationBell(BuildContext context) {
+  Widget _buildNotificationBell(BuildContext context, {Color iconColor = kTextPrimary}) {
     final list = _getNotifications(context);
     return Stack(
       alignment: Alignment.center,
       children: [
         IconButton(
-          icon: const Icon(Icons.notifications_none_outlined, size: 26, color: kTextPrimary),
+          icon: Icon(Icons.notifications_none_outlined, size: 26, color: iconColor),
           onPressed: () => _showNotificationsBottomSheet(context, list),
         ),
         if (list.isNotEmpty)
@@ -369,206 +369,243 @@ class _DashboardScreenState extends State<DashboardScreen> {
       },
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20),
-
-          // Premium Top bar
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${getGreeting()} 👋',
-                    style: AppTextStyles.bodySm.copyWith(
-                      color: kTextSecondary,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    auth.ownerName,
-                    style: AppTextStyles.headlineSm.copyWith(
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ],
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // HERO BACKGROUND
+            Container(
+              height: 260,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: kPrimaryDark,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(32),
+                  bottomRight: Radius.circular(32),
+                ),
               ),
-              Row(
+              child: Stack(
                 children: [
-                  _buildNotificationBell(context),
-                  const SizedBox(width: 8),
-                  // Premium profile avatar with gradient
-                  Container(
-                    width: 46,
-                    height: 46,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [kPrimary, kPrimaryDark],
+                  // Abstract geometric background elements
+                  Positioned(
+                    top: -60,
+                    right: -40,
+                    child: Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(0.05),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: kPrimary.withOpacity(0.35),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: -20,
+                    left: -20,
+                    child: Container(
+                      width: 140,
+                      height: 140,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(0.05),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 60, 24, 0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${getGreeting()} 👋',
+                              style: AppTextStyles.bodyMd.copyWith(
+                                color: Colors.white.withOpacity(0.8),
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              auth.ownerName,
+                              style: AppTextStyles.headlineLg.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            _buildNotificationBell(context, iconColor: Colors.white),
+                            const SizedBox(width: 12),
+                            Container(
+                              width: 46,
+                              height: 46,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Text(
+                                  getInitials(auth.ownerName),
+                                  style: AppTextStyles.labelLg.copyWith(
+                                    color: kPrimaryDark,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    child: Center(
-                      child: Text(
-                        getInitials(auth.ownerName),
-                        style: AppTextStyles.labelLg.copyWith(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
+                  ),
+                ],
+              ),
+            ),
+
+            // FLOATING CARDS & CONTENT
+            Padding(
+              padding: const EdgeInsets.only(top: 150, left: 20, right: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Stat cards floating over the background
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _StatCard(
+                          title: AppStrings.todaysOrders,
+                          value: '${orders.todaysOrders}',
+                          icon: Icons.receipt_long_outlined,
+                          color: kPrimary,
                         ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // Stat cards
-          Row(
-            children: [
-              Expanded(
-                child: _StatCard(
-                  title: AppStrings.todaysOrders,
-                  value: '${orders.todaysOrders}',
-                  icon: Icons.receipt_long_outlined,
-                  color: kPrimary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _StatCard(
-                  title: AppStrings.pendingDelivery,
-                  value: '${orders.pendingDelivery}',
-                  icon: Icons.local_shipping_outlined,
-                  color: Colors.orange,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          // Payments Due card
-          _PaymentsDueCard(amount: orders.paymentsDue),
-          const SizedBox(height: 24),
-
-          // Quick action buttons
-          Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  text: AppStrings.newOrder,
-                  icon: Icons.add,
-                  onPressed: () => Navigator.pushNamed(context, '/orders/new'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: AppButton(
-                  text: AppStrings.addCustomer,
-                  icon: Icons.person_add_outlined,
-                  isOutlined: true,
-                  onPressed: () => Navigator.pushNamed(context, '/customers/add'),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 28),
-
-          // Premium section header: Recent Orders
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Text(AppStrings.recentOrders,
-                      style: AppTextStyles.headlineSm.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.3,
-                      )),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: kPrimary.withOpacity(0.09),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '${orders.recentOrders.length}',
-                      style: AppTextStyles.labelSm.copyWith(
-                        color: kPrimary,
-                        fontWeight: FontWeight.w700,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _StatCard(
+                          title: AppStrings.pendingDelivery,
+                          value: '${orders.pendingDelivery}',
+                          icon: Icons.local_shipping_outlined,
+                          color: Colors.orange,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
+                  const SizedBox(height: 16),
+
+                  // Payments Due card
+                  _PaymentsDueCard(amount: orders.paymentsDue),
+                  const SizedBox(height: 24),
+
+                  // Quick action buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AppButton(
+                          text: AppStrings.newOrder,
+                          icon: Icons.add,
+                          onPressed: () => Navigator.pushNamed(context, '/orders/new'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: AppButton(
+                          text: AppStrings.addCustomer,
+                          icon: Icons.person_add_outlined,
+                          isOutlined: true,
+                          onPressed: () => Navigator.pushNamed(context, '/customers/add'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Premium section header: Recent Orders
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Text(AppStrings.recentOrders,
+                              style: AppTextStyles.headlineSm.copyWith(
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.3,
+                              )),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: kPrimary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '${orders.recentOrders.length}',
+                              style: AppTextStyles.labelSm.copyWith(
+                                color: kPrimary,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          backgroundColor: kSurfaceContainer,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pushNamed(context, '/orders'),
+                        child: Text(
+                          AppStrings.viewAll,
+                          style: AppTextStyles.labelSm.copyWith(
+                            color: kTextPrimary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Recent orders list
+                  if (orders.recentOrders.isEmpty)
+                    _EmptyState(
+                      icon: Icons.receipt_long_outlined,
+                      title: AppStrings.noOrdersYet,
+                      subtitle: AppStrings.createFirstOrder,
+                    )
+                  else
+                    ...orders.recentOrders.map((order) {
+                      final customer = context.read<CustomerProvider>().getCustomerById(order.customerId);
+                      return OrderCard(
+                        order: order,
+                        customer: customer,
+                        onTap: () => Navigator.pushNamed(context, '/orders/${order.id}'),
+                      );
+                    }),
+                  const SizedBox(height: 48),
                 ],
               ),
-              TextButton(
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 6),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    side: BorderSide(
-                        color: kPrimary.withOpacity(0.2)),
-                  ),
-                ),
-                onPressed: () =>
-                    Navigator.pushNamed(context, '/orders'),
-                child: Text(
-                  AppStrings.viewAll,
-                  style: AppTextStyles.labelSm.copyWith(
-                    color: kPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          // Recent orders list
-          if (orders.recentOrders.isEmpty)
-            _EmptyState(
-              icon: Icons.receipt_long_outlined,
-              title: AppStrings.noOrdersYet,
-              subtitle: AppStrings.createFirstOrder,
-            )
-          else
-            ...orders.recentOrders.map((order) {
-              final customer = context.read<CustomerProvider>().getCustomerById(order.customerId);
-              return OrderCard(
-                order: order,
-                customer: customer,
-                onTap: () => Navigator.pushNamed(
-                  context,
-                  '/orders/${order.id}',
-                ),
-              );
-            }),
-
-          const SizedBox(height: 24),
-        ],
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
 
 /// Premium Stat Card with gradient icon box and deeper shadow
