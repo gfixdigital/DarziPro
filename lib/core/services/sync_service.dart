@@ -146,15 +146,23 @@ class SyncService {
     final data = await SupabaseService.fetchAll('customers', shopId, since: since);
     final box = HiveService.customersBoxInstance;
     for (final json in data) {
-      final incoming = Customer.fromJson(json);
-      incoming.isSynced = true; // mark as synced since it came from cloud
+      try {
+        final incoming = Customer.fromJson(json);
+        incoming.isSynced = true; // mark as synced since it came from cloud
 
-      final existing = box.get(incoming.id);
-      // Skip if we have a local unsynced version (don't overwrite offline edits)
-      if (existing != null && !existing.isSynced) continue;
+        final existing = box.get(incoming.id);
+        // Skip if we have a local unsynced version (don't overwrite offline edits)
+        if (existing != null && !existing.isSynced) continue;
 
-      await box.put(incoming.id, incoming);
-      HiveService.extractAndSaveDefaultMetadata(incoming);
+        await box.put(incoming.id, incoming);
+        try {
+          HiveService.extractAndSaveDefaultMetadata(incoming);
+        } catch (e) {
+          debugPrint('Error extracting metadata for customer ${incoming.id}: $e');
+        }
+      } catch (e) {
+        debugPrint('Error pulling customer: $e, json: $json');
+      }
     }
   }
 
@@ -162,14 +170,18 @@ class SyncService {
     final data = await SupabaseService.fetchAll('orders', shopId, since: since);
     final box = HiveService.ordersBoxInstance;
     for (final json in data) {
-      final incoming = Order.fromJson(json);
-      incoming.isSynced = true; // mark as synced since it came from cloud
+      try {
+        final incoming = Order.fromJson(json);
+        incoming.isSynced = true; // mark as synced since it came from cloud
 
-      final existing = box.get(incoming.id);
-      // Skip if we have a local unsynced version (don't overwrite offline edits)
-      if (existing != null && !existing.isSynced) continue;
+        final existing = box.get(incoming.id);
+        // Skip if we have a local unsynced version (don't overwrite offline edits)
+        if (existing != null && !existing.isSynced) continue;
 
-      await box.put(incoming.id, incoming);
+        await box.put(incoming.id, incoming);
+      } catch (e) {
+        debugPrint('Error pulling order: $e, json: $json');
+      }
     }
   }
 
@@ -177,13 +189,17 @@ class SyncService {
     final data = await SupabaseService.fetchAll('measurements', shopId, since: since);
     final box = HiveService.measurementsBoxInstance;
     for (final json in data) {
-      final incoming = Measurement.fromJson(json);
-      incoming.isSynced = true;
+      try {
+        final incoming = Measurement.fromJson(json);
+        incoming.isSynced = true;
 
-      final existing = box.get(incoming.id);
-      if (existing != null && !existing.isSynced) continue;
+        final existing = box.get(incoming.id);
+        if (existing != null && !existing.isSynced) continue;
 
-      await box.put(incoming.id, incoming);
+        await box.put(incoming.id, incoming);
+      } catch (e) {
+        debugPrint('Error pulling measurement: $e, json: $json');
+      }
     }
   }
 
@@ -191,13 +207,17 @@ class SyncService {
     final data = await SupabaseService.fetchAll('style_preferences', shopId, since: since);
     final box = HiveService.stylePrefsBoxInstance;
     for (final json in data) {
-      final incoming = StylePreference.fromJson(json);
-      incoming.isSynced = true;
+      try {
+        final incoming = StylePreference.fromJson(json);
+        incoming.isSynced = true;
 
-      final existing = box.get(incoming.id);
-      if (existing != null && !existing.isSynced) continue;
+        final existing = box.get(incoming.id);
+        if (existing != null && !existing.isSynced) continue;
 
-      await box.put(incoming.id, incoming);
+        await box.put(incoming.id, incoming);
+      } catch (e) {
+        debugPrint('Error pulling style pref: $e, json: $json');
+      }
     }
   }
 }
