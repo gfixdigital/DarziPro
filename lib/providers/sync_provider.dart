@@ -8,6 +8,7 @@ class SyncProvider extends ChangeNotifier {
   final ConnectivityService _connectivity;
   bool _isSyncing = false;
   bool _lastSyncFailed = false;
+  DateTime? _lastAutoSyncTime;
 
   /// Called after a successful pull so the app can reload data into providers
   VoidCallback? onDataRefreshed;
@@ -24,12 +25,21 @@ class SyncProvider extends ChangeNotifier {
 
   /// Triggered automatically when connectivity is restored
   void _onConnectivityRestored() {
-    syncNow();
+    syncNow(isAutomatic: true);
   }
 
   /// Manually trigger sync (push local → cloud, then pull cloud → local)
-  Future<void> syncNow() async {
+  Future<void> syncNow({bool isAutomatic = false}) async {
     if (_isSyncing || !_connectivity.isOnline) return;
+
+    final now = DateTime.now();
+    if (isAutomatic && _lastAutoSyncTime != null) {
+      final difference = now.difference(_lastAutoSyncTime!);
+      if (difference.inSeconds < 30) {
+        debugPrint('SyncProvider: Throttling automatic sync. Last sync was ${difference.inSeconds}s ago.');
+        return;
+      }
+    }
 
     _isSyncing = true;
     _lastSyncFailed = false;
@@ -45,6 +55,7 @@ class SyncProvider extends ChangeNotifier {
         await SyncService.pullUpdates(shopId);
 
         _lastSyncFailed = !pushSuccess;
+        _lastAutoSyncTime = DateTime.now();
 
         // Notify the app to reload data from Hive into memory (refreshes UI)
         onDataRefreshed?.call();

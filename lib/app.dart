@@ -206,7 +206,7 @@ class _HomeScreenState extends State<_HomeScreen> with WidgetsBindingObserver {
 
       // Trigger automatic full sync on startup if online
       if (syncProvider.isOnline) {
-        syncProvider.syncNow();
+        syncProvider.syncNow(isAutomatic: true);
       }
     });
   }
@@ -228,7 +228,7 @@ class _HomeScreenState extends State<_HomeScreen> with WidgetsBindingObserver {
       }
       final syncProvider = context.read<SyncProvider>();
       if (syncProvider.isOnline) {
-        syncProvider.syncNow();
+        syncProvider.syncNow(isAutomatic: true);
       }
     } else if (state == AppLifecycleState.paused) {
       // Keep realtime alive in paused (still runs), only stop on dispose

@@ -51,13 +51,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _checkForUpdate();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Refresh every time this screen becomes visible (e.g., after creating order)
-    _refreshData();
-  }
-
   void _refreshData() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {

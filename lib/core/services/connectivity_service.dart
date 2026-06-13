@@ -17,13 +17,16 @@ class ConnectivityService extends ChangeNotifier {
 
     // Listen for changes
     _subscription = Connectivity().onConnectivityChanged.listen((result) {
-      final wasOffline = !_isOnline;
-      _isOnline = result != ConnectivityResult.none;
-      notifyListeners();
+      final newOnline = result != ConnectivityResult.none;
+      if (newOnline != _isOnline) {
+        final wasOffline = !_isOnline;
+        _isOnline = newOnline;
+        notifyListeners();
 
-      if (wasOffline && _isOnline) {
-        // Connection restored — trigger sync via provider
-        onConnectivityRestored?.call();
+        if (wasOffline && _isOnline) {
+          // Connection restored — trigger sync via provider
+          onConnectivityRestored?.call();
+        }
       }
     });
   }
