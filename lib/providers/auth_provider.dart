@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/services/hive_service.dart';
 import '../core/services/supabase_service.dart';
 import '../core/services/sync_service.dart';
+import '../core/services/realtime_service.dart';
 
 /// Authentication state management
 class AuthProvider extends ChangeNotifier {
@@ -88,6 +89,10 @@ class AuthProvider extends ChangeNotifier {
 
           // Pull fresh data from cloud
           await SyncService.pullAll(shopId);
+
+          // Start realtime subscription so any future web changes
+          // are pushed to device instantly without needing a manual sync
+          RealtimeService.start(shopId);
         }
 
         _isAuthenticated = true;
@@ -111,6 +116,8 @@ class AuthProvider extends ChangeNotifier {
   /// Logout
   Future<void> logout() async {
     try {
+      // Stop realtime WebSocket before signing out
+      await RealtimeService.stop();
       await SupabaseService.signOut();
     } catch (_) {}
     await HiveService.clearAuth();

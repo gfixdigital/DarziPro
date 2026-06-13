@@ -3,12 +3,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'core/constants/colors.dart';
 import 'core/constants/text_styles.dart';
-import 'providers/auth_provider.dart';
 import 'providers/customer_provider.dart';
 import 'providers/order_provider.dart';
 import 'providers/language_provider.dart';
 import 'providers/sync_provider.dart';
 import 'core/services/hive_service.dart';
+import 'core/services/realtime_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/orders/orders_list_screen.dart';
@@ -193,7 +193,18 @@ class _HomeScreenState extends State<_HomeScreen> with WidgetsBindingObserver {
         context.read<CustomerProvider>().loadCustomers();
       };
 
-      // Trigger automatic sync on startup if online
+      // Wire up realtime — any DB push updates Hive then reloads UI immediately
+      final shopId = HiveService.shopId;
+      if (shopId != null) {
+        RealtimeService.onRemoteChange = () {
+          if (!mounted) return;
+          context.read<OrderProvider>().loadOrders();
+          context.read<CustomerProvider>().loadCustomers();
+        };
+        RealtimeService.start(shopId);
+      }
+
+      // Trigger automatic full sync on startup if online
       if (syncProvider.isOnline) {
         syncProvider.syncNow();
       }
@@ -203,16 +214,24 @@ class _HomeScreenState extends State<_HomeScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    RealtimeService.stop();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      // Re-subscribe to realtime in case WebSocket was dropped in background
+      final shopId = HiveService.shopId;
+      if (shopId != null) {
+        RealtimeService.start(shopId);
+      }
       final syncProvider = context.read<SyncProvider>();
       if (syncProvider.isOnline) {
         syncProvider.syncNow();
       }
+    } else if (state == AppLifecycleState.paused) {
+      // Keep realtime alive in paused (still runs), only stop on dispose
     }
   }
 

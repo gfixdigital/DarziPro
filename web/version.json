@@ -1,1 +1,1 @@
-{ "version": "1.0.5", "build": 6, "releaseNotes": "Custom pull-to-refresh scissors animation on the dashboard." }
+{ "version": "1.0.6", "build": 7, "releaseNotes": "Enterprise realtime sync: order and payment status changes from web now appear on phone instantly via Supabase WebSocket." }

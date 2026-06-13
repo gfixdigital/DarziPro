@@ -56,14 +56,16 @@ class SyncService {
     }
   }
 
-  /// Pull incremental updates from Supabase since the last sync timestamp.
+  /// Pull all updates from Supabase (full refresh) as a safety net.
+  /// Realtime handles instant pushes; this catches anything missed while offline.
   static Future<void> pullUpdates(String shopId) async {
     try {
-      final since = HiveService.lastSyncTime;
-      await _pullCustomers(shopId, since: since);
-      await _pullOrders(shopId, since: since);
-      await _pullMeasurements(shopId, since: since);
-      await _pullStylePreferences(shopId, since: since);
+      // Always do a full pull — no since filter to avoid timezone edge cases.
+      // Realtime handles live pushes; this is the offline-recovery safety net.
+      await _pullCustomers(shopId);
+      await _pullOrders(shopId);
+      await _pullMeasurements(shopId);
+      await _pullStylePreferences(shopId);
       HiveService.lastSyncTime = DateTime.now().toUtc();
     } catch (e) {
       debugPrint('Pull updates error: $e');
