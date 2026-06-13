@@ -1,1 +1,1 @@
-{ "version": "1.0.6", "build": 7, "releaseNotes": "Enterprise realtime sync: order and payment status changes from web now appear on phone instantly via Supabase WebSocket." }
+{ "version": "1.0.7", "build": 8, "releaseNotes": "OTA download now shows Connecting... spinner immediately, then live MB progress bar." }

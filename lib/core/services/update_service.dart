@@ -178,9 +178,12 @@ class _DownloadProgressDialog extends StatefulWidget {
 class _DownloadProgressDialogState extends State<_DownloadProgressDialog> {
   double _progress = 0;
   bool _isComplete = false;
-  bool _isIndeterminate = false; // true when server doesn't send Content-Length
+  // Always start indeterminate — shows spinner immediately while connecting
+  bool _isIndeterminate = true;
   String? _error;
   String? _apkPath;
+  int _receivedBytes = 0;
+  int _totalBytes = 0;
 
   @override
   void initState() {
@@ -202,10 +205,14 @@ class _DownloadProgressDialogState extends State<_DownloadProgressDialog> {
       final totalBytes = streamedResponse.contentLength ?? 0;
       int receivedBytes = 0;
 
-      // If no Content-Length header, show indeterminate spinner
-      if (totalBytes == 0 && mounted) {
-        setState(() => _isIndeterminate = true);
+      // Switch to determinate progress if server provides Content-Length
+      if (totalBytes > 0 && mounted) {
+        setState(() {
+          _totalBytes = totalBytes;
+          _isIndeterminate = false;
+        });
       }
+      // If no Content-Length, stays indeterminate (already set in initState)
 
       Directory? dir;
       if (!kIsWeb && Platform.isAndroid) {
@@ -229,7 +236,12 @@ class _DownloadProgressDialogState extends State<_DownloadProgressDialog> {
         sink.add(chunk);
         receivedBytes += chunk.length;
         if (totalBytes > 0 && mounted) {
-          setState(() => _progress = receivedBytes / totalBytes);
+          setState(() {
+            _receivedBytes = receivedBytes;
+            _progress = receivedBytes / totalBytes;
+          });
+        } else if (mounted) {
+          setState(() => _receivedBytes = receivedBytes);
         }
       }
 
@@ -326,11 +338,10 @@ class _DownloadProgressDialogState extends State<_DownloadProgressDialog> {
               child: Text(isUrdu ? 'بند کریں' : 'Close'),
             ),
           ] else ...[
-            // Progress bar
+            // Progress bar — indeterminate while connecting, determinate while downloading
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
-                // null value = indeterminate, 0..1 = determinate
                 value: _isIndeterminate ? null : _progress,
                 minHeight: 12,
                 backgroundColor: kPrimary.withOpacity(0.12),
@@ -340,22 +351,25 @@ class _DownloadProgressDialogState extends State<_DownloadProgressDialog> {
               ),
             ),
             const SizedBox(height: 10),
+            // Main progress label
             Text(
-              _isIndeterminate
-                  ? (isUrdu ? 'ڈاؤن لوڈ جاری ہے...' : 'Downloading...')
-                  : _isComplete
-                      ? (isUrdu ? 'مکمل ✓' : 'Complete ✓')
-                      : '${(_progress * 100).toInt()}%',
+              _isComplete
+                  ? (isUrdu ? 'مکمل ✓' : 'Complete ✓')
+                  : _isIndeterminate && _receivedBytes == 0
+                      ? (isUrdu ? 'کنیکٹ ہو رہا ہے...' : 'Connecting...')
+                      : _isIndeterminate
+                          ? '${(_receivedBytes / 1048576).toStringAsFixed(1)} MB'
+                          : '${(_progress * 100).toInt()}%  •  ${(_receivedBytes / 1048576).toStringAsFixed(1)} / ${(_totalBytes / 1048576).toStringAsFixed(1)} MB',
               style: TextStyle(
-                fontSize: 14,
-                color: kTextSecondary,
+                fontSize: 13,
+                color: _isComplete ? Colors.green : kTextSecondary,
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               isUrdu
-                  ? 'براہ کرم انتظار کریں'
+                  ? 'ایپ بند نہ کریں'
                   : 'Please keep the app open',
               style: TextStyle(fontSize: 11, color: kTextSecondary),
               textAlign: TextAlign.center,
