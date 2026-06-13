@@ -1,1 +1,1 @@
-{ "version": "1.0.9", "build": 10, "releaseNotes": "Critical fix: Addressed pull-to-refresh UI issues, null safety crash fixes in cloud sync resulting in missing orders, and fixed styles missing on order creation." }
+{ "version": "1.1.0", "build": 11, "releaseNotes": "Critical sync fix: Resolved infinite syncing loops on startup/web-focus and fixed dashboard rendering loops." }
