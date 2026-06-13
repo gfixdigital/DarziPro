@@ -57,152 +57,172 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
             child: Form(
               key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 40),
-
-                  // Logo
-                  Image.network(
-                    'https://ik.imagekit.io/vveiuli91/Pictures/GFix%20digital%20Logo%20wth%20rectangle%20shape.png',
-                    height: 90,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: kPrimary,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: kPrimary.withOpacity(0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.content_cut,
-                          color: Colors.white,
-                          size: 40,
-                        ),
-                      );
-                    },
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 410),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
+                decoration: BoxDecoration(
+                  color: kSurface,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: kBorder.withOpacity(0.8),
+                    width: 1.5,
                   ),
-                  const SizedBox(height: 24),
-
-                  // App name
-                  Text(
-                    AppStrings.appName,
-                    style: AppTextStyles.headlineLgMobile.copyWith(
-                      color: kPrimary,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
                     ),
-                  ),
-                  const SizedBox(height: 8),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 12),
 
-                  // Tagline
-                  Text(
-                    AppStrings.appTagline,
-                    style: AppTextStyles.bodyMd.copyWith(
-                      color: kTextSecondary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 40),
-
-                  // Phone field
-                  AppInput(
-                    label: AppStrings.phonePlaceholder,
-                    hint: '3XX XXXXXXX',
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(11),
-                    ],
-                    prefix: Text(
-                      AppStrings.phonePrefix,
-                      style: AppTextStyles.bodyMd.copyWith(
-                        color: kTextSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Phone number is required';
-                      }
-                      if (value.trim().length < 10) {
-                        return 'Enter a valid phone number';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Password field
-                  AppInput(
-                    label: AppStrings.passwordPlaceholder,
-                    hint: 'Enter your password',
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    suffix: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                        color: kTextSecondary,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
+                    // Logo
+                    Image.network(
+                      'https://ik.imagekit.io/vveiuli91/Pictures/GFix%20digital%20Logo%20wth%20rectangle%20shape.png',
+                      height: 90,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: kPrimary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: kPrimary.withOpacity(0.3),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.content_cut,
+                            color: Colors.white,
+                            size: 40,
+                          ),
+                        );
                       },
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Password is required';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 32),
+                    const SizedBox(height: 20),
 
-                  // Login button
-                  Consumer<AuthProvider>(
-                    builder: (context, auth, _) {
-                      return AppButton(
-                        text: AppStrings.loginButton,
-                        onPressed: _handleLogin,
-                        isLoading: auth.isLoading,
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 48),
+                    // App name
+                    Text(
+                      AppStrings.appName,
+                      style: AppTextStyles.headlineLgMobile.copyWith(
+                        color: kPrimary,
+                        fontSize: 26,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
 
-                  // Footer
-                  Text(
-                    AppStrings.appFooter,
-                    style: AppTextStyles.labelSm.copyWith(
-                      color: kTextSecondary.withOpacity(0.6),
+                    // Tagline
+                    Text(
+                      AppStrings.appTagline,
+                      style: AppTextStyles.bodyMd.copyWith(
+                        color: kTextSecondary,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Designed & Developed by GFix Digital',
-                    style: AppTextStyles.labelSm.copyWith(
-                      color: kPrimary.withOpacity(0.8),
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
+                    const SizedBox(height: 32),
+
+                    // Phone field
+                    AppInput(
+                      label: AppStrings.phonePlaceholder,
+                      hint: '3XX XXXXXXX',
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(11),
+                      ],
+                      prefix: Text(
+                        AppStrings.phonePrefix,
+                        style: AppTextStyles.bodyMd.copyWith(
+                          color: kTextSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Phone number is required';
+                        }
+                        if (value.trim().length < 10) {
+                          return 'Enter a valid phone number';
+                        }
+                        return null;
+                      },
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                ],
+                    const SizedBox(height: 16),
+
+                    // Password field
+                    AppInput(
+                      label: AppStrings.passwordPlaceholder,
+                      hint: 'Enter your password',
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      suffix: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: kTextSecondary,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Password is required';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Login button
+                    Consumer<AuthProvider>(
+                      builder: (context, auth, _) {
+                        return AppButton(
+                          text: AppStrings.loginButton,
+                          onPressed: _handleLogin,
+                          isLoading: auth.isLoading,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Footer
+                    Text(
+                      AppStrings.appFooter,
+                      style: AppTextStyles.labelSm.copyWith(
+                        color: kTextSecondary.withOpacity(0.6),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Designed & Developed by GFix Digital',
+                      style: AppTextStyles.labelSm.copyWith(
+                        color: kPrimary.withOpacity(0.8),
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ),
               ),
             ),
           ),

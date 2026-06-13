@@ -151,13 +151,21 @@ class _OrderCardState extends State<OrderCard>
                                         color: kPrimary.withOpacity(0.08),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
-                                      child: Text(
-                                        '#${order.orderNumber}',
-                                        style: AppTextStyles.labelSm.copyWith(
-                                          color: kPrimary,
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: 0.5,
-                                        ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(Icons.content_cut,
+                                              size: 10, color: kPrimary),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '#${order.orderNumber}',
+                                            style: AppTextStyles.labelSm.copyWith(
+                                              color: kPrimary,
+                                              fontWeight: FontWeight.w700,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                     if (order.isUrgent) ...[
@@ -198,9 +206,10 @@ class _OrderCardState extends State<OrderCard>
                             // Customer name
                             Text(
                               customer?.name ?? AppStrings.unknownCustomer,
-                              style: AppTextStyles.bodyMd.copyWith(
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.2,
+                              style: AppTextStyles.headlineSm.copyWith(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.1,
                               ),
                             ),
                             const SizedBox(height: 3),
@@ -220,10 +229,20 @@ class _OrderCardState extends State<OrderCard>
                             ),
                             const SizedBox(height: 10),
 
-                            // Divider
-                            Container(
-                              height: 1,
-                              color: kSurfaceContainerHigh.withOpacity(0.5),
+                            // Stitched Sewing Line
+                            Row(
+                              children: List.generate(
+                                32,
+                                (index) => Expanded(
+                                  child: Container(
+                                    height: 1,
+                                    margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                                    color: index % 2 == 0
+                                        ? kBorder.withOpacity(0.5)
+                                        : Colors.transparent,
+                                  ),
+                                ),
+                              ),
                             ),
                             const SizedBox(height: 10),
 

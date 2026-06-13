@@ -66,7 +66,7 @@ class AppInput extends StatelessWidget {
               color: kTextSecondary.withOpacity(0.5),
             ),
             filled: true,
-            fillColor: kPrimaryLight,
+            fillColor: kSurfaceContainer,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
@@ -82,38 +82,38 @@ class AppInput extends StatelessWidget {
                 : null,
             suffixIcon: suffix,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: kBorder.withOpacity(0.3),
-                width: 1,
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(
+                color: kBorder,
+                width: 1.2,
               ),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: kBorder.withOpacity(0.3),
-                width: 1,
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(
+                color: kBorder,
+                width: 1.2,
               ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(14),
               borderSide: const BorderSide(
                 color: kPrimary,
-                width: 2,
+                width: 1.8,
               ),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(14),
               borderSide: const BorderSide(
                 color: kError,
-                width: 1,
+                width: 1.2,
               ),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(14),
               borderSide: const BorderSide(
                 color: kError,
-                width: 2,
+                width: 1.8,
               ),
             ),
             errorStyle: AppTextStyles.labelSm.copyWith(color: kError),

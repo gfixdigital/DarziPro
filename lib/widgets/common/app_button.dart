@@ -46,7 +46,7 @@ class AppButton extends StatelessWidget {
               ? BorderSide(color: borderColor, width: 1.5)
               : BorderSide.none,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(14),
           ),
           elevation: 0,
         ),
@@ -99,18 +99,18 @@ class DashedButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onPressed,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(14),
       child: Container(
         width: double.infinity,
         height: 48,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: kPrimary,
-            width: 1,
-            style: BorderStyle.solid, // Simulating dashed with solid + opacity
+            color: kPrimary.withOpacity(0.3),
+            width: 1.5,
+            style: BorderStyle.solid,
           ),
-          color: kPrimaryLight.withOpacity(0.3),
+          color: kPrimary.withOpacity(0.04),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
