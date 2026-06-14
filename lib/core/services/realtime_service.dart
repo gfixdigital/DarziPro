@@ -88,6 +88,19 @@ class RealtimeService {
           callback: (payload) => _handleStylePrefChange(payload),
         )
 
+        // ── Shops (Subscription Status) ────────────────────────
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'shops',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'id',
+            value: shopId,
+          ),
+          callback: (payload) => _handleShopChange(payload),
+        )
+
         .subscribe((status, [error]) {
           debugPrint('RealtimeService: status=$status error=$error');
         });
@@ -191,6 +204,22 @@ class RealtimeService {
       debugPrint('RT: style_pref ${incoming.id} written to Hive');
     } catch (e) {
       debugPrint('RT style_pref handler error: $e');
+    }
+  }
+
+  static Future<void> _handleShopChange(PostgresChangePayload payload) async {
+    try {
+      final json = payload.newRecord;
+      if (json.isEmpty) return;
+
+      final dateStr = json['subscription_ends_at'] as String?;
+      if (dateStr != null) {
+        HiveService.subscriptionEndsAt = DateTime.tryParse(dateStr);
+        debugPrint('RT: shop subscription updated: $dateStr');
+        onRemoteChange?.call();
+      }
+    } catch (e) {
+      debugPrint('RT shop handler error: $e');
     }
   }
 }

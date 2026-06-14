@@ -202,6 +202,7 @@ class _HomeScreenState extends State<_HomeScreen> with WidgetsBindingObserver {
         if (!mounted) return;
         context.read<OrderProvider>().loadOrders();
         context.read<CustomerProvider>().loadCustomers();
+        context.read<AuthProvider>().checkAuth();
       };
 
       // Wire up realtime — any DB push updates Hive then reloads UI immediately
@@ -211,6 +212,7 @@ class _HomeScreenState extends State<_HomeScreen> with WidgetsBindingObserver {
           if (!mounted) return;
           context.read<OrderProvider>().loadOrders();
           context.read<CustomerProvider>().loadCustomers();
+          context.read<AuthProvider>().checkAuth();
         };
         RealtimeService.start(shopId);
       }

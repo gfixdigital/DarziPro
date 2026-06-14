@@ -46,6 +46,14 @@ class SyncService {
   /// Preserves locally unsynced records (does not overwrite them).
   static Future<void> pullAll(String shopId) async {
     try {
+      final shopData = await SupabaseService.fetchShop(shopId);
+      if (shopData != null) {
+        final dateStr = shopData['subscription_ends_at'] as String?;
+        if (dateStr != null) {
+          HiveService.subscriptionEndsAt = DateTime.tryParse(dateStr);
+        }
+      }
+
       await _pullCustomers(shopId);
       await _pullOrders(shopId);
       await _pullMeasurements(shopId);
@@ -60,8 +68,14 @@ class SyncService {
   /// Realtime handles instant pushes; this catches anything missed while offline.
   static Future<void> pullUpdates(String shopId) async {
     try {
-      // Always do a full pull — no since filter to avoid timezone edge cases.
-      // Realtime handles live pushes; this is the offline-recovery safety net.
+      final shopData = await SupabaseService.fetchShop(shopId);
+      if (shopData != null) {
+        final dateStr = shopData['subscription_ends_at'] as String?;
+        if (dateStr != null) {
+          HiveService.subscriptionEndsAt = DateTime.tryParse(dateStr);
+        }
+      }
+
       await _pullCustomers(shopId);
       await _pullOrders(shopId);
       await _pullMeasurements(shopId);
